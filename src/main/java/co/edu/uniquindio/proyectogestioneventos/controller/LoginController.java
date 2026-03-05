@@ -2,15 +2,17 @@ package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
 import co.edu.uniquindio.proyectogestioneventos.model.Cliente;
-import co.edu.uniquindio.proyectogestioneventos.model.EventoUQ;
+import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
+
+import java.util.Optional;
 
 public class LoginController {
 
-    private EventoUQ eventoUQ;
+    private final Taquilla taquilla;
 
     public LoginController() {
-        this.eventoUQ = EventoUQ.getInstance();
+        this.taquilla = Taquilla.getInstance();
     }
 
     public String procesarLogin(String id, String contrasena) {
@@ -21,11 +23,13 @@ public class LoginController {
             return "ERROR_PASSWORD_VACIO";
         }
 
-        Usuario usuario = eventoUQ.buscarUsuario(id, contrasena);
+        Optional<Usuario> usuarioOptional = taquilla.validarUsuario(id, contrasena);
 
-        if (usuario == null) {
+        if (!usuarioOptional.isPresent()) {
             return "ERROR_CREDENCIALES";
         }
+
+        Usuario usuario = usuarioOptional.get();
 
         if (usuario instanceof Administrador) {
             return "ADMINISTRADOR";
@@ -35,6 +39,6 @@ public class LoginController {
             return "CLIENTE";
         }
 
-        return "ERROR_CREDENCIALES";
+        return "ERROR_TIPO_USUARIO_DESCONOCIDO";
     }
 }
