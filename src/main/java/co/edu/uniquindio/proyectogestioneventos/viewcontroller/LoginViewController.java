@@ -8,6 +8,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 public class LoginViewController {
 
@@ -24,16 +26,28 @@ public class LoginViewController {
 
     @FXML
     void onIngresar(ActionEvent event) {
-        String usuario = cbUsuario.getValue();
+        iniciarSesion();
+    }
+
+    @FXML
+    void onPasswordEnter(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            iniciarSesion();
+        }
+    }
+
+    private void iniciarSesion() {
+        String tipoUsuarioSeleccionado = cbUsuario.getValue();
         String contrasena = txtContrasena.getText();
-        
-        // Use "admin" for "Administrador" and "cliente" for "Usuario"
-        String id = "cliente";
-        if ("Administrador".equals(usuario)) {
-            id = "admin";
+
+        String idUsuario = null;
+        if ("Administrador".equals(tipoUsuarioSeleccionado)) {
+            idUsuario = "admin"; // ID del administrador de prueba
+        } else if ("Usuario".equals(tipoUsuarioSeleccionado)) {
+            idUsuario = "cliente1"; // ID del cliente de prueba
         }
 
-        String resultado = loginController.procesarLogin(id, contrasena);
+        String resultado = loginController.procesarLogin(idUsuario, contrasena);
 
         switch (resultado) {
             case "ADMINISTRADOR":
@@ -49,7 +63,10 @@ public class LoginViewController {
                 mostrarAlerta("Error de Validación", "El campo de contraseña no puede estar vacío.", Alert.AlertType.WARNING);
                 break;
             case "ERROR_CREDENCIALES":
-                mostrarAlerta("Datos Incorrectos", "La contraseña no es válida.", Alert.AlertType.ERROR);
+                mostrarAlerta("Datos Incorrectos", "El usuario o la contraseña no son válidos.", Alert.AlertType.ERROR);
+                break;
+            case "ERROR_TIPO_USUARIO_DESCONOCIDO":
+                mostrarAlerta("Error Interno", "El tipo de usuario no se pudo determinar.", Alert.AlertType.ERROR);
                 break;
         }
     }

@@ -53,7 +53,7 @@
                            </items>
                         </ComboBox>
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="CONTRASEÑA" GridPane.rowIndex="1" />
-                        <PasswordField fx:id="txtContrasena" alignment="TOP_LEFT" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <PasswordField fx:id="txtContrasena" alignment="TOP_LEFT" onKeyPressed="#onPasswordEnter" prefHeight="26.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                      </children>
                      <HBox.margin>
                         <Insets />
