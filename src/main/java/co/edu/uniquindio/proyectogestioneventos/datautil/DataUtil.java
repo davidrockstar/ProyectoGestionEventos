@@ -13,7 +13,7 @@ public class DataUtil {
         Administrador admin = new Administrador(
                 "admin",
                 "Admin Principal",
-                "admin@evento.com",
+                "admin@eventos.com", // Corregido
                 "1234567890",
                 "admin" // contraseña
         );
@@ -22,10 +22,10 @@ public class DataUtil {
         // Crear un cliente con datos de ejemplo
         Cliente cliente = new Cliente(
                 "cliente1",
-                "Carlos Perez",
-                "carlos@email.com",
+                "Ana", // Corregido
+                "ana@email.com", // Corregido
                 "0987654321",
-                "cliente" // contraseña
+                "user123" // Corregido
         );
         taquilla.agregarUsuario(cliente);
 
