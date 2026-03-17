@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.proyectogestioneventos.controller.ExplorarEventosController">
+   <children>
+      <Label layoutX="30.0" layoutY="25.0" text="Explorar Eventos">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <TableView fx:id="tablaEventos" layoutX="30.0" layoutY="150.0" prefHeight="250.0" prefWidth="740.0">
+        <columns>
+          <TableColumn prefWidth="150.0" text="Nombre" />
+          <TableColumn prefWidth="100.0" text="Categoría" />
+            <TableColumn prefWidth="120.0" text="Ciudad" />
+            <TableColumn prefWidth="150.0" text="Fecha y Hora" />
+            <TableColumn prefWidth="120.0" text="Recinto" />
+            <TableColumn prefWidth="70.0" text="Precio Base" />
+        </columns>
+      </TableView>
+      <Label layoutX="30.0" layoutY="70.0" text="Filtros:" />
+      <DatePicker fx:id="campoFecha" layoutX="30.0" layoutY="95.0" promptText="Fecha" />
+      <TextField fx:id="campoCiudad" layoutX="200.0" layoutY="95.0" promptText="Ciudad" />
+      <TextField fx:id="campoCategoria" layoutX="370.0" layoutY="95.0" promptText="Categoría" />
+      <TextField fx:id="campoPrecioMax" layoutX="540.0" layoutY="95.0" promptText="Precio Máx." />
+      <Button layoutX="700.0" layoutY="95.0" mnemonicParsing="false" onAction="#onFiltrarClick" text="Filtrar" />
+      <Button layoutX="30.0" layoutY="420.0" mnemonicParsing="false" onAction="#onVerDetalleClick" text="Ver Detalle" />
+      <Button layoutX="700.0" layoutY="420.0" mnemonicParsing="false" onAction="#onVolverClick" text="Volver al Panel" />
+   </children>
+</AnchorPane>
