@@ -1,6 +1,9 @@
 package co.edu.uniquindio.proyectogestioneventos.controller;
 
+import co.edu.uniquindio.proyectogestioneventos.MyApplication;
 import co.edu.uniquindio.proyectogestioneventos.model.Evento;
+import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,6 +11,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -16,6 +21,8 @@ import java.io.IOException;
 
 public class DetalleEventoController {
 
+    @FXML
+    private AnchorPane rootPane;
     @FXML
     private Text lblNombreEvento;
     @FXML
@@ -57,9 +64,21 @@ public class DetalleEventoController {
     }
 
     @FXML
+    private void initialize() {
+        // Añadir listener para la tecla ESC al panel raíz
+        rootPane.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                onVolverClick(null);
+            }
+        });
+    }
+
+    @FXML
     void onSeleccionarEntradasClick(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/view/SeleccionEntradasView.fxml"));
+            Usuario usuario = MyApplication.getUsuarioLogueado();
+            String basePath = (usuario != null && usuario.getRol() == Rol.ADMINISTRADOR) ? "administrador/" : "cliente/";
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "SeleccionEntradasView.fxml"));
             Parent root = loader.load();
             SeleccionEntradasController controller = loader.getController();
             controller.setEvento(eventoActual); // Pasar el evento a la pantalla de selección de entradas
@@ -77,7 +96,7 @@ public class DetalleEventoController {
 
     @FXML
     void onVolverClick(ActionEvent event) {
-        Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         stage.close();
     }
 }

@@ -1,22 +1,20 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoAsiento;
-import java.io.Serializable;
 
-public class Asiento implements Serializable {
+public class Asiento {
     private String idAsiento;
     private String fila;
-    private int numero;
-    private EstadoAsiento estadoAsiento;
+    private String numero;
+    private EstadoAsiento estado;
 
-    public Asiento(String idAsiento, String fila, int numero) {
+    public Asiento(String idAsiento, String fila, String numero, EstadoAsiento estado) {
         this.idAsiento = idAsiento;
         this.fila = fila;
         this.numero = numero;
-        this.estadoAsiento = EstadoAsiento.DISPONIBLE; // Por defecto
+        this.estado = estado;
     }
 
-    // Getters y Setters
     public String getIdAsiento() {
         return idAsiento;
     }
@@ -33,28 +31,19 @@ public class Asiento implements Serializable {
         this.fila = fila;
     }
 
-    public int getNumero() {
+    public String getNumero() {
         return numero;
     }
 
-    public void setNumero(int numero) {
+    public void setNumero(String numero) {
         this.numero = numero;
     }
 
-    public EstadoAsiento getEstadoAsiento() {
-        return estadoAsiento;
+    public EstadoAsiento getEstado() {
+        return estado;
     }
 
-    public void setEstadoAsiento(EstadoAsiento estadoAsiento) {
-        this.estadoAsiento = estadoAsiento;
-    }
-
-    @Override
-    public String toString() {
-        return "Asiento{" +
-                "fila='" + fila + '\'' +
-                ", numero=" + numero +
-                ", estado=" + estadoAsiento +
-                '}';
+    public void setEstado(EstadoAsiento estado) {
+        this.estado = estado;
     }
 }

@@ -19,7 +19,7 @@ public class ReporteServiceImpl implements IReporteService {
                         .append(compra.getFechaCreacion().toLocalDate().toString()).append(',')
                         .append(compra.getEvento().getNombre()).append(',')
                         .append(String.valueOf(compra.getTotal())).append(',')
-                        .append(compra.getEstadoCompra().toString()).append('\n');
+                        .append(compra.getEstado().toString()).append('\n');
             }
         }
         return file;

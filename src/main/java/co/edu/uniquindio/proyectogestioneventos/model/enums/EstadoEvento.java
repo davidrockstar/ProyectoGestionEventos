@@ -1,8 +1,9 @@
 package co.edu.uniquindio.proyectogestioneventos.model.enums;
 
 public enum EstadoEvento {
-    ACTIVO,
-    FINALIZADO,
+    BORRADOR,
+    PUBLICADO,
+    PAUSADO,
     CANCELADO,
-    APLAZADO
+    FINALIZADO
 }

@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -27,6 +28,15 @@ public class ReportesController {
 
     public void setCompras(ObservableList<Compra> compras) {
         this.comprasParaReporte = compras;
+
+        // Añadir listener para la tecla ESC
+        if (dpFechaInicio.getScene() != null) {
+            dpFechaInicio.getScene().setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    onVolverClick(null);
+                }
+            });
+        }
     }
 
     @FXML
@@ -82,7 +92,7 @@ public class ReportesController {
 
     @FXML
     void onVolverClick(ActionEvent event) {
-        Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) dpFechaInicio.getScene().getWindow();
         stage.close();
     }
 

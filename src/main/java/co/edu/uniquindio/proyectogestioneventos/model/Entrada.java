@@ -1,24 +1,22 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoEntrada;
-import java.io.Serializable;
 
-public class Entrada implements Serializable {
+public class Entrada {
     private String idEntrada;
     private Zona zona;
-    private Asiento asiento;
+    private Asiento asiento; // Puede ser null si la zona no es numerada
     private double precioFinal;
-    private EstadoEntrada estadoEntrada;
+    private EstadoEntrada estado;
 
-    public Entrada(String idEntrada, Zona zona, Asiento asiento, double precioFinal) {
+    public Entrada(String idEntrada, Zona zona, Asiento asiento, double precioFinal, EstadoEntrada estado) {
         this.idEntrada = idEntrada;
         this.zona = zona;
         this.asiento = asiento;
         this.precioFinal = precioFinal;
-        this.estadoEntrada = EstadoEntrada.VALIDA; // Por defecto
+        this.estado = estado;
     }
 
-    // Getters y Setters
     public String getIdEntrada() {
         return idEntrada;
     }
@@ -51,20 +49,11 @@ public class Entrada implements Serializable {
         this.precioFinal = precioFinal;
     }
 
-    public EstadoEntrada getEstadoEntrada() {
-        return estadoEntrada;
+    public EstadoEntrada getEstado() {
+        return estado;
     }
 
-    public void setEstadoEntrada(EstadoEntrada estadoEntrada) {
-        this.estadoEntrada = estadoEntrada;
-    }
-
-    @Override
-    public String toString() {
-        return "Entrada{" +
-                "idEntrada='" + idEntrada + '\'' +
-                ", zona=" + zona.getNombre() +
-                ", asiento=" + asiento.getFila() + asiento.getNumero() +
-                '}';
+    public void setEstado(EstadoEntrada estado) {
+        this.estado = estado;
     }
 }

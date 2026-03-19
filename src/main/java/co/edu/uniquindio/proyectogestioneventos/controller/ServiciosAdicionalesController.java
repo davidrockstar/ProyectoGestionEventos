@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 public class ServiciosAdicionalesController {
@@ -28,6 +29,15 @@ public class ServiciosAdicionalesController {
         this.compraActual = compra;
         lblCompra.setText("Compra: " + compra.getIdCompra());
         // Lógica para pre-seleccionar servicios ya agregados a la compra
+
+        // Añadir listener para la tecla ESC
+        if (lblCompra.getScene() != null) {
+            lblCompra.getScene().setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    onVolverClick(null);
+                }
+            });
+        }
     }
 
     @FXML
@@ -40,7 +50,7 @@ public class ServiciosAdicionalesController {
 
     @FXML
     void onVolverClick(ActionEvent event) {
-        Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) lblCompra.getScene().getWindow();
         stage.close();
     }
 }

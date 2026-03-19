@@ -1,24 +1,24 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
-import java.io.Serializable;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.TipoIncidencia;
+
 import java.time.LocalDateTime;
 
-public class Incidencia implements Serializable {
+public class Incidencia {
     private String idIncidencia;
-    private String tipo; // Ej: "Técnica", "Logística", "Seguridad"
+    private TipoIncidencia tipo;
     private String descripcion;
     private LocalDateTime fecha;
-    private Object entidadAfectada; // Puede ser un Evento, Compra, etc.
+    private Object entidadAfectada; // Puede ser Evento, Compra, Usuario, etc.
 
-    public Incidencia(String idIncidencia, String tipo, String descripcion, Object entidadAfectada) {
+    public Incidencia(String idIncidencia, TipoIncidencia tipo, String descripcion, LocalDateTime fecha, Object entidadAfectada) {
         this.idIncidencia = idIncidencia;
         this.tipo = tipo;
         this.descripcion = descripcion;
-        this.fecha = LocalDateTime.now();
+        this.fecha = fecha;
         this.entidadAfectada = entidadAfectada;
     }
 
-    // Getters y Setters
     public String getIdIncidencia() {
         return idIncidencia;
     }
@@ -27,11 +27,11 @@ public class Incidencia implements Serializable {
         this.idIncidencia = idIncidencia;
     }
 
-    public String getTipo() {
+    public TipoIncidencia getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoIncidencia tipo) {
         this.tipo = tipo;
     }
 
@@ -57,13 +57,5 @@ public class Incidencia implements Serializable {
 
     public void setEntidadAfectada(Object entidadAfectada) {
         this.entidadAfectada = entidadAfectada;
-    }
-
-    @Override
-    public String toString() {
-        return "Incidencia{" +
-                "tipo='" + tipo + '\'' +
-                ", fecha=" + fecha +
-                '}';
     }
 }
