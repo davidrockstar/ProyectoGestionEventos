@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -38,7 +39,7 @@ public class DetalleCompraController {
         lblIdCompra.setText("Detalle de Compra: " + compra.getIdCompra());
         lblEvento.setText(compra.getEvento().getNombre());
         lblFechaCreacion.setText(compra.getFechaCreacion().toLocalDate().toString());
-        lblEstado.setText(compra.getEstadoCompra().toString());
+        lblEstado.setText(compra.getEstado().toString());
         // Construir strings de entradas y servicios
         StringBuilder entradasStr = new StringBuilder();
         compra.getListaEntradas().forEach(entrada ->
@@ -49,18 +50,27 @@ public class DetalleCompraController {
         txtEntradas.setText(entradasStr.toString());
 
         StringBuilder serviciosStr = new StringBuilder();
-        compra.getListaServicios().forEach(servicio ->
+        compra.getListaServiciosAdicionales().forEach(servicio ->
                 serviciosStr.append(servicio.getNombre()).append(": $").append(servicio.getPrecio()).append("\n")
         );
         txtServicios.setText(serviciosStr.toString());
 
         lblTotal.setText("$ " + String.format("%.2f", compra.getTotal()));
+
+        // Añadir listener para la tecla ESC
+        if (lblIdCompra.getScene() != null) {
+            lblIdCompra.getScene().setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    onVolverClick(null);
+                }
+            });
+        }
     }
 
     @FXML
     void onAgregarServiciosClick(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/view/ServiciosAdicionalesView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/ServiciosAdicionalesView.fxml"));
             Parent root = loader.load();
             ServiciosAdicionalesController controller = loader.getController();
             controller.setCompra(compraActual);
@@ -90,7 +100,7 @@ public class DetalleCompraController {
 
     @FXML
     void onVolverClick(ActionEvent event) {
-        Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) lblIdCompra.getScene().getWindow();
         stage.close();
     }
 }

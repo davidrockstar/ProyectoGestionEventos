@@ -1,6 +1,7 @@
 module co.edu.uniquindio.proyectogestioneventos {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.logging;
 
 
     opens co.edu.uniquindio.proyectogestioneventos to javafx.fxml;
@@ -11,4 +12,5 @@ module co.edu.uniquindio.proyectogestioneventos {
     opens co.edu.uniquindio.proyectogestioneventos.model to javafx.fxml;
     exports co.edu.uniquindio.proyectogestioneventos.controller;
     opens co.edu.uniquindio.proyectogestioneventos.controller to javafx.fxml;
+    exports co.edu.uniquindio.proyectogestioneventos.model.enums;
 }

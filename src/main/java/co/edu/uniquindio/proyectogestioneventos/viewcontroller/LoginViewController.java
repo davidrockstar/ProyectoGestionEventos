@@ -1,11 +1,11 @@
 package co.edu.uniquindio.proyectogestioneventos.viewcontroller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
-import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
-import co.edu.uniquindio.proyectogestioneventos.model.Cliente;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.IUsuarioService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.UsuarioServiceImpl;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
@@ -27,10 +28,18 @@ public class LoginViewController {
     private final IUsuarioService usuarioService = new UsuarioServiceImpl();
 
     @FXML
+    private TextField txtUsuario;
+
+    @FXML
     private PasswordField txtContrasena;
 
     @FXML
-    private ComboBox<String> cbUsuario;
+    private ComboBox<Rol> cbxRol;
+
+    @FXML
+    void initialize() {
+        cbxRol.setItems(FXCollections.observableArrayList(Rol.values()));
+    }
 
     @FXML
     void onIngresar(ActionEvent event) {
@@ -53,7 +62,7 @@ public class LoginViewController {
             stage.setTitle("Registro de Usuario");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(MyApplication.mainStage);
+            stage.initOwner(MyApplication.getMainStage());
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,38 +71,29 @@ public class LoginViewController {
     }
 
     private void iniciarSesion() {
-        String tipoUsuarioSeleccionado = cbUsuario.getValue();
+        String correo = txtUsuario.getText();
         String contrasena = txtContrasena.getText();
+        Rol rol = cbxRol.getValue();
 
-        if (tipoUsuarioSeleccionado == null) {
-            mostrarAlerta("Error de Validación", "Seleccione un tipo de usuario.", Alert.AlertType.WARNING);
+        if (correo.isEmpty() || contrasena.isEmpty() || rol == null) {
+            mostrarAlerta("Error de Validación", "Todos los campos son obligatorios.", Alert.AlertType.WARNING);
             return;
         }
 
-        if (contrasena.isEmpty()) {
-            mostrarAlerta("Error de Validación", "El campo de contraseña no puede estar vacío.", Alert.AlertType.WARNING);
-            return;
-        }
-
-        String email = null;
-        if ("Administrador".equals(tipoUsuarioSeleccionado)) {
-            email = "admin@eventos.com"; // Email del administrador de prueba
-        } else if ("Usuario".equals(tipoUsuarioSeleccionado)) {
-            email = "ana@email.com"; // Email del cliente de prueba
-        }
-
-        Optional<Usuario> usuarioOptional = usuarioService.autenticarUsuario(email, contrasena);
+        Optional<Usuario> usuarioOptional = usuarioService.autenticarUsuario(correo, contrasena);
 
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
-            if (usuario instanceof Administrador) {
-                // Lógica para la escena del administrador
-                System.out.println("Login de administrador exitoso.");
-            } else if (usuario instanceof Cliente) {
-                MyApplication.cambiarEscenaUsuario("usuarioView", usuario);
+            if (rol == Rol.ADMINISTRADOR && usuario.getRol() == Rol.ADMINISTRADOR) {
+                MyApplication.cambiarEscenaAdministrador("administradorView.fxml", usuario);
+            } else if (rol == Rol.CLIENTE && usuario.getRol() == Rol.CLIENTE) {
+                MyApplication.cambiarEscenaUsuario("usuarioView.fxml", usuario);
+            }
+            else {
+                mostrarAlerta("Error de Autenticación", "Correo, contraseña o rol incorrectos.", Alert.AlertType.ERROR);
             }
         } else {
-            mostrarAlerta("Datos Incorrectos", "El correo o la contraseña no son válidos.", Alert.AlertType.ERROR);
+            mostrarAlerta("Error de Autenticación", "Correo, contraseña o rol incorrectos.", Alert.AlertType.ERROR);
         }
     }
 

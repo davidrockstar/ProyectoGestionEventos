@@ -1,11 +1,9 @@
 package co.edu.uniquindio.proyectogestioneventos.viewcontroller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
-import co.edu.uniquindio.proyectogestioneventos.controller.ExplorarEventosController;
-import co.edu.uniquindio.proyectogestioneventos.controller.HistorialComprasController;
 import co.edu.uniquindio.proyectogestioneventos.controller.PerfilUsuarioController;
+import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -41,27 +39,43 @@ public class UsuarioViewController {
 
     @FXML
     void onExplorarEventosClick() {
-        abrirVentana("/co/edu/uniquindio/proyectogestioneventos/usuario/ExplorarEventosView.fxml", "Explorar Eventos");
+        abrirVentana("explorarEventosView.fxml", "Explorar Eventos");
     }
 
     @FXML
     void onMisComprasClick() {
-        abrirVentana("/co/edu/uniquindio/proyectogestioneventos/usuario/MisComprasView.fxml", "Mis Compras");
+        abrirVentana("MisComprasView.fxml", "Mis Compras");
     }
 
     @FXML
     void onHistorialComprasClick() {
-        abrirVentana("/co/edu/uniquindio/proyectogestioneventos/usuario/HistorialComprasView.fxml", "Historial de Compras");
+        abrirVentana("historialComprasView.fxml", "Historial de Compras");
     }
 
     @FXML
     void onPerfilUsuarioClick() {
-        abrirVentana("/co/edu/uniquindio/proyectogestioneventos/usuario/PerfilUsuarioView.fxml", "Gestionar Perfil");
+        try {
+            String basePath = (usuarioActual instanceof Administrador) ? "administrador/" : "cliente/";
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "perfilUsuarioView.fxml"));
+            Parent root = loader.load();
+
+            PerfilUsuarioController controller = loader.getController();
+            controller.setUsuario(this.usuarioActual);
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestionar Perfil");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void abrirVentana(String fxmlPath, String title) {
+    private void abrirVentana(String fxmlName, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            String basePath = (usuarioActual instanceof Administrador) ? "administrador/" : "cliente/";
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + fxmlName));
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle(title);

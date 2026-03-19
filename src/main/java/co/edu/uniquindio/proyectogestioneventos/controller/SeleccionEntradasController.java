@@ -7,10 +7,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class SeleccionEntradasController {
 
+    @FXML
+    private AnchorPane rootPane;
     @FXML
     private Label lblEvento;
     @FXML
@@ -33,16 +37,26 @@ public class SeleccionEntradasController {
     }
 
     @FXML
+    private void initialize() {
+        // Añadir listener para la tecla ESC al panel raíz
+        rootPane.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                onCancelarClick(null);
+            }
+        });
+    }
+
+    @FXML
     void onAgregarACompraClick(ActionEvent event) {
         // Lógica para agregar entradas a una compra (RF-005)
         System.out.println("Entradas agregadas a la compra.");
-        Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         stage.close();
     }
 
     @FXML
     void onCancelarClick(ActionEvent event) {
-        Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         stage.close();
     }
 }

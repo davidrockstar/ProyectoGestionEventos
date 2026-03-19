@@ -1,48 +1,39 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
-import java.io.Serializable;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.TipoMetodoPago;
 
-public class MetodoPago implements Serializable {
-    private String idMetodo;
-    private String tipo; // Ej: "Tarjeta de Crédito", "PSE"
-    private String numeroSimulado; // Ej: "**** **** **** 1234"
+public class MetodoPago {
+    private String id;
+    private TipoMetodoPago tipo;
+    private String detalles;
 
-    public MetodoPago(String idMetodo, String tipo, String numeroSimulado) {
-        this.idMetodo = idMetodo;
+    public MetodoPago(String id, TipoMetodoPago tipo, String detalles) {
+        this.id = id;
         this.tipo = tipo;
-        this.numeroSimulado = numeroSimulado;
+        this.detalles = detalles;
     }
 
-    // Getters y Setters
-    public String getIdMetodo() {
-        return idMetodo;
+    public String getId() {
+        return id;
     }
 
-    public void setIdMetodo(String idMetodo) {
-        this.idMetodo = idMetodo;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getTipo() {
+    public TipoMetodoPago getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoMetodoPago tipo) {
         this.tipo = tipo;
     }
 
-    public String getNumeroSimulado() {
-        return numeroSimulado;
+    public String getDetalles() {
+        return detalles;
     }
 
-    public void setNumeroSimulado(String numeroSimulado) {
-        this.numeroSimulado = numeroSimulado;
-    }
-
-    @Override
-    public String toString() {
-        return "MetodoPago{" +
-                "idMetodo='" + idMetodo + '\'' +
-                ", tipo='" + tipo + '\'' +
-                '}';
+    public void setDetalles(String detalles) {
+        this.detalles = detalles;
     }
 }

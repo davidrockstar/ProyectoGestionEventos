@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="rootPane" minHeight="800.0" minWidth="1200.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.proyectogestioneventos.viewcontroller.PanelMetricasAdminViewController">
+   <children>
+      <VBox spacing="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+         <children>
+            <Label text="Panel de Métricas (Administrador)">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="Rango de Fechas:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <ComboBox fx:id="cbRangoFechas" prefWidth="150.0" promptText="Seleccionar Rango" />
+                  <Button mnemonicParsing="false" onAction="#onActualizarMetricasClick" text="Actualizar Métricas" />
+               </children>
+            </HBox>
+            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <VBox HBox.hgrow="ALWAYS" spacing="10.0">
+                     <children>
+                        <Label text="Ventas por Periodo">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <LineChart fx:id="ventasPorPeriodoChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="ventasPeriodoXAxis" label="Periodo" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="ventasPeriodoYAxis" label="Ventas" />
+                           </yAxis>
+                        </LineChart>
+                        <Label text="Ingresos por Servicios Adicionales">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <PieChart fx:id="ingresosServiciosAdicionalesChart" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+                  <VBox HBox.hgrow="ALWAYS" spacing="10.0">
+                     <children>
+                        <Label text="Ocupación por Zona">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <BarChart fx:id="ocupacionPorZonaChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="ocupacionZonaXAxis" label="Zona" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="ocupacionZonaYAxis" label="Porcentaje de Ocupación" />
+                           </yAxis>
+                        </BarChart>
+                        <Label text="Tasa de Cancelación">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblTasaCancelacion" text="XX.XX%" VBox.vgrow="ALWAYS">
+                           <font>
+                              <Font name="System Bold" size="36.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="20.0" top="20.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Label text="Top Eventos">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <BarChart fx:id="topEventosChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="topEventosXAxis" label="Evento" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="topEventosYAxis" label="Cantidad / Ingresos" />
+                           </yAxis>
+                        </BarChart>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onVolverClick" text="Volver" />
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>

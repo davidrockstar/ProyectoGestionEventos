@@ -9,7 +9,7 @@ public interface ICompraService {
     /**
      * RF-006: Inicia una nueva compra para un usuario y un evento.
      */
-    Compra crearCompra(Usuario usuario, Evento evento);
+    Compra crearCompra(Usuario usuario, Evento evento, List<Entrada> entradas);
 
     /**
      * RF-005, RF-006: Agrega una entrada a una compra existente.

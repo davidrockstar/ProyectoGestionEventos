@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyectogestioneventos.controller;
 
+import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.IUsuarioService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.UsuarioServiceImpl;
 import javafx.event.ActionEvent;
@@ -8,8 +9,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
-import java.util.UUID;
 
 public class RegistroViewController {
 
@@ -44,9 +43,7 @@ public class RegistroViewController {
         }
 
         try {
-            // Generar un ID único para el nuevo usuario
-            String idUsuario = "user-" + UUID.randomUUID().toString().substring(0, 6);
-            usuarioService.registrarUsuario(idUsuario, nombre, correo, telefono, contrasena);
+            usuarioService.registrarUsuario(nombre, correo, telefono, contrasena, Rol.CLIENTE);
             mostrarAlerta("Registro Exitoso", "Usuario registrado correctamente.", Alert.AlertType.INFORMATION);
             // Cerrar ventana de registro
             Stage stage = (Stage) ((javafx.scene.control.Button) event.getSource()).getScene().getWindow();

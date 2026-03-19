@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="rootPane" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.proyectogestioneventos.viewcontroller.AdminDashboardViewController">
+   <children>
+      <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+         <children>
+            <Label text="Panel de Administración">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <Button mnemonicParsing="false" onAction="#onGestionarUsuariosClick" prefWidth="200.0" text="Gestionar Usuarios" />
+            <Button mnemonicParsing="false" onAction="#onGestionarEventosClick" prefWidth="200.0" text="Gestionar Eventos" />
+            <Button mnemonicParsing="false" onAction="#onGestionarRecintosClick" prefWidth="200.0" text="Gestionar Recintos" />
+            <Button mnemonicParsing="false" onAction="#onGestionarZonasClick" prefWidth="200.0" text="Gestionar Zonas" />
+            <Button mnemonicParsing="false" onAction="#onGestionarAsientosClick" prefWidth="200.0" text="Gestionar Asientos" />
+            <Button mnemonicParsing="false" onAction="#onGestionarComprasClick" prefWidth="200.0" text="Gestionar Compras" />
+            <Button mnemonicParsing="false" onAction="#onGestionarIncidenciasClick" prefWidth="200.0" text="Gestionar Incidencias" />
+            <Button mnemonicParsing="false" onAction="#onPanelMetricasClick" prefWidth="200.0" text="Panel de Métricas" />
+            <Button mnemonicParsing="false" onAction="#onCerrarSesionClick" prefWidth="200.0" text="Cerrar Sesión" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>

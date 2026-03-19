@@ -1,10 +1,9 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Recinto implements Serializable {
+public class Recinto {
     private String idRecinto;
     private String nombre;
     private String direccion;
@@ -19,7 +18,6 @@ public class Recinto implements Serializable {
         this.listaZonas = new ArrayList<>();
     }
 
-    // Getters y Setters
     public String getIdRecinto() {
         return idRecinto;
     }
@@ -60,11 +58,11 @@ public class Recinto implements Serializable {
         this.listaZonas = listaZonas;
     }
 
-    @Override
-    public String toString() {
-        return "Recinto{" +
-                "nombre='" + nombre + '\'' +
-                ", ciudad='" + ciudad + '\'' +
-                '}';
+    public void agregarZona(Zona zona) {
+        this.listaZonas.add(zona);
+    }
+
+    public void eliminarZona(Zona zona) {
+        this.listaZonas.remove(zona);
     }
 }

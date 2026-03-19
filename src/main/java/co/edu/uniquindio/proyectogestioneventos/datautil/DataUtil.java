@@ -1,8 +1,8 @@
 package co.edu.uniquindio.proyectogestioneventos.datautil;
 
 import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
-import co.edu.uniquindio.proyectogestioneventos.model.Cliente;
 import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
+import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 
 public class DataUtil {
 
@@ -13,19 +13,19 @@ public class DataUtil {
         Administrador admin = new Administrador(
                 "admin",
                 "Admin Principal",
-                "admin@eventos.com", // Corregido
+                "admin@eventos.com",
                 "1234567890",
-                "admin" // contraseña
+                "123" // contraseña
         );
         taquilla.agregarUsuario(admin);
 
-        // Crear un cliente con datos de ejemplo
-        Cliente cliente = new Cliente(
+        // Crear un cliente (usuario normal) con datos de ejemplo
+        Usuario cliente = new Usuario(
                 "cliente1",
-                "Ana", // Corregido
-                "ana@email.com", // Corregido
+                "Juan",
+                "juan@email.com",
                 "0987654321",
-                "user123" // Corregido
+                "123"
         );
         taquilla.agregarUsuario(cliente);
 

@@ -1,31 +1,30 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoEvento;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
-public class Evento implements Serializable {
+public class Evento {
     private String idEvento;
     private String nombre;
-    private String categoria; // Ej: "Concierto", "Deporte"
+    private String categoria;
     private String descripcion;
     private String ciudad;
     private LocalDateTime fechaHora;
-    private EstadoEvento estadoEvento;
+    private EstadoEvento estado;
     private Recinto recinto;
 
-    public Evento(String idEvento, String nombre, String categoria, String descripcion, String ciudad, LocalDateTime fechaHora, Recinto recinto) {
+    public Evento(String idEvento, String nombre, String categoria, String descripcion, String ciudad, LocalDateTime fechaHora, EstadoEvento estado, Recinto recinto) {
         this.idEvento = idEvento;
         this.nombre = nombre;
         this.categoria = categoria;
         this.descripcion = descripcion;
         this.ciudad = ciudad;
         this.fechaHora = fechaHora;
+        this.estado = estado;
         this.recinto = recinto;
-        this.estadoEvento = EstadoEvento.ACTIVO; // Por defecto
     }
 
-    // Getters y Setters
     public String getIdEvento() {
         return idEvento;
     }
@@ -74,12 +73,12 @@ public class Evento implements Serializable {
         this.fechaHora = fechaHora;
     }
 
-    public EstadoEvento getEstadoEvento() {
-        return estadoEvento;
+    public EstadoEvento getEstado() {
+        return estado;
     }
 
-    public void setEstadoEvento(EstadoEvento estadoEvento) {
-        this.estadoEvento = estadoEvento;
+    public void setEstado(EstadoEvento estado) {
+        this.estado = estado;
     }
 
     public Recinto getRecinto() {
@@ -88,15 +87,5 @@ public class Evento implements Serializable {
 
     public void setRecinto(Recinto recinto) {
         this.recinto = recinto;
-    }
-
-    @Override
-    public String toString() {
-        return "Evento{" +
-                "nombre='" + nombre + '\'' +
-                ", categoria='" + categoria + '\'' +
-                ", ciudad='" + ciudad + '\'' +
-                ", fechaHora=" + fechaHora +
-                '}';
     }
 }

@@ -1,25 +1,22 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
-import java.io.Serializable;
-
-public class ServicioAdicional implements Serializable {
-    private String idServicio;
+public class ServicioAdicional {
+    private String id;
     private String nombre;
     private double precio;
 
-    public ServicioAdicional(String idServicio, String nombre, double precio) {
-        this.idServicio = idServicio;
+    public ServicioAdicional(String id, String nombre, double precio) {
+        this.id = id;
         this.nombre = nombre;
         this.precio = precio;
     }
 
-    // Getters y Setters
-    public String getIdServicio() {
-        return idServicio;
+    public String getId() {
+        return id;
     }
 
-    public void setIdServicio(String idServicio) {
-        this.idServicio = idServicio;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNombre() {
@@ -36,13 +33,5 @@ public class ServicioAdicional implements Serializable {
 
     public void setPrecio(double precio) {
         this.precio = precio;
-    }
-
-    @Override
-    public String toString() {
-        return "ServicioAdicional{" +
-                "nombre='" + nombre + '\'' +
-                ", precio=" + precio +
-                '}';
     }
 }

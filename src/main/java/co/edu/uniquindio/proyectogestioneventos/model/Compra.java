@@ -1,33 +1,32 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.ArrayList;
 
-public class Compra implements Serializable {
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Compra {
     private String idCompra;
     private Usuario usuario;
     private Evento evento;
     private LocalDateTime fechaCreacion;
-    private EstadoCompra estadoCompra;
     private double total;
+    private EstadoCompra estado;
     private List<Entrada> listaEntradas;
-    private List<ServicioAdicional> listaServicios;
+    private List<ServicioAdicional> listaServiciosAdicionales;
 
-    public Compra(String idCompra, Usuario usuario, Evento evento) {
+    public Compra(String idCompra, Usuario usuario, Evento evento, LocalDateTime fechaCreacion, EstadoCompra estado) {
         this.idCompra = idCompra;
         this.usuario = usuario;
         this.evento = evento;
-        this.fechaCreacion = LocalDateTime.now();
-        this.estadoCompra = EstadoCompra.PENDIENTE;
-        this.total = 0.0;
+        this.fechaCreacion = fechaCreacion;
+        this.estado = estado;
         this.listaEntradas = new ArrayList<>();
-        this.listaServicios = new ArrayList<>();
+        this.listaServiciosAdicionales = new ArrayList<>();
+        this.total = 0;
     }
 
-    // Getters y Setters
     public String getIdCompra() {
         return idCompra;
     }
@@ -60,14 +59,6 @@ public class Compra implements Serializable {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public EstadoCompra getEstadoCompra() {
-        return estadoCompra;
-    }
-
-    public void setEstadoCompra(EstadoCompra estadoCompra) {
-        this.estadoCompra = estadoCompra;
-    }
-
     public double getTotal() {
         return total;
     }
@@ -76,29 +67,55 @@ public class Compra implements Serializable {
         this.total = total;
     }
 
+    public EstadoCompra getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoCompra estado) {
+        this.estado = estado;
+    }
+
     public List<Entrada> getListaEntradas() {
         return listaEntradas;
     }
 
     public void setListaEntradas(List<Entrada> listaEntradas) {
         this.listaEntradas = listaEntradas;
+        calcularTotal();
     }
 
-    public List<ServicioAdicional> getListaServicios() {
-        return listaServicios;
+    public List<ServicioAdicional> getListaServiciosAdicionales() {
+        return listaServiciosAdicionales;
     }
 
-    public void setListaServicios(List<ServicioAdicional> listaServicios) {
-        this.listaServicios = listaServicios;
+    public void setListaServiciosAdicionales(List<ServicioAdicional> listaServiciosAdicionales) {
+        this.listaServiciosAdicionales = listaServiciosAdicionales;
+        calcularTotal();
     }
 
-    @Override
-    public String toString() {
-        return "Compra{" +
-                "idCompra='" + idCompra + '\'' +
-                ", usuario=" + usuario.getNombre() +
-                ", evento=" + evento.getNombre() +
-                ", total=" + total +
-                '}';
+    public void agregarEntrada(Entrada entrada) {
+        this.listaEntradas.add(entrada);
+        calcularTotal();
+    }
+
+    public void eliminarEntrada(Entrada entrada) {
+        this.listaEntradas.remove(entrada);
+        calcularTotal();
+    }
+
+    public void agregarServicioAdicional(ServicioAdicional servicio) {
+        this.listaServiciosAdicionales.add(servicio);
+        calcularTotal();
+    }
+
+    public void eliminarServicioAdicional(ServicioAdicional servicio) {
+        this.listaServiciosAdicionales.remove(servicio);
+        calcularTotal();
+    }
+
+    public void calcularTotal() {
+        double totalEntradas = listaEntradas.stream().mapToDouble(Entrada::getPrecioFinal).sum();
+        double totalServicios = listaServiciosAdicionales.stream().mapToDouble(ServicioAdicional::getPrecio).sum();
+        this.total = totalEntradas + totalServicios;
     }
 }

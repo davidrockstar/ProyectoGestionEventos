@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
+import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.service.IUsuarioService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.UsuarioServiceImpl;
@@ -33,7 +34,7 @@ public class LoginController {
         String contrasena = txtContrasena.getText();
 
         if (correo.isEmpty() || contrasena.isEmpty()) {
-            mostrarAlerta("Error de Validación", "Todos los campos son obligatorios.", Alert.AlertType.WARNING);
+            mostrarAlerta("Error de Validación", "El correo y la contraseña son obligatorios.", Alert.AlertType.WARNING);
             return;
         }
 
@@ -41,8 +42,13 @@ public class LoginController {
 
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
-            // Asumiendo que solo tenemos un tipo de usuario para el dashboard
-            MyApplication.cambiarEscenaUsuario("usuarioView", usuario);
+            MyApplication.setUsuarioLogueado(usuario); // Guardar el usuario logueado
+
+            if (usuario instanceof Administrador) {
+                MyApplication.cambiarEscenaAdministrador("AdminDashboardView.fxml", usuario);
+            } else {
+                MyApplication.cambiarEscenaUsuario("usuarioView.fxml", usuario);
+            }
         } else {
             mostrarAlerta("Error de Autenticación", "Correo o contraseña incorrectos.", Alert.AlertType.ERROR);
         }
@@ -51,13 +57,13 @@ public class LoginController {
     @FXML
     void onGoToRegisterClick(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/view/RegistroView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/RegistroView.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Registro de Usuario");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(MyApplication.mainStage);
+            stage.initOwner(MyApplication.getMainStage());
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
