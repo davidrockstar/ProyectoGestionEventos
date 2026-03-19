@@ -14,12 +14,11 @@ public class CompraBuilder {
     private LocalDateTime fechaCreacion;
     private EstadoCompra estado;
     private List<Entrada> listaEntradas = new ArrayList<>();
-    private List<ServicioAdicional> listaServiciosAdicionales = new ArrayList<>();
 
     public CompraBuilder() {
-        this.idCompra = UUID.randomUUID().toString().substring(0, 8);
+        this.idCompra = "C-" + UUID.randomUUID().toString().substring(0, 5);
         this.fechaCreacion = LocalDateTime.now();
-        this.estado = EstadoCompra.PENDIENTE;
+        this.estado = EstadoCompra.CREADA; // Estado inicial correcto
     }
 
     public CompraBuilder setUsuario(Usuario usuario) {
@@ -42,19 +41,15 @@ public class CompraBuilder {
         return this;
     }
 
-    public CompraBuilder agregarServicio(ServicioAdicional servicio) {
-        this.listaServiciosAdicionales.add(servicio);
-        return this;
-    }
-
     public Compra build() {
         if (usuario == null || evento == null) {
             throw new IllegalStateException("El usuario y el evento son obligatorios para crear una compra.");
         }
+        // Se crea la compra con el constructor principal
         Compra compra = new Compra(idCompra, usuario, evento, fechaCreacion, estado);
+        // Se asigna la lista de entradas
         compra.setListaEntradas(listaEntradas);
-        compra.setListaServiciosAdicionales(listaServiciosAdicionales);
-        compra.calcularTotal();
+        // Los métodos setListaServiciosAdicionales y calcularTotal ya no son necesarios aquí.
         return compra;
     }
 }

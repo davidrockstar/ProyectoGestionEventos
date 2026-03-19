@@ -1,11 +1,12 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
+import co.edu.uniquindio.proyectogestioneventos.model.observer.IObservador;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Usuario {
+public class Usuario implements IObservador {
     private String idUsuario;
     private String nombre;
     private String email;
@@ -13,6 +14,7 @@ public class Usuario {
     private String contrasena;
     private List<MetodoPago> listaMetodosPago;
     private List<Compra> listaCompras;
+    private List<String> notificaciones; // Para almacenar notificaciones
 
     public Usuario(String idUsuario, String nombre, String email, String telefono, String contrasena) {
         this.idUsuario = idUsuario;
@@ -22,6 +24,7 @@ public class Usuario {
         this.contrasena = contrasena;
         this.listaMetodosPago = new ArrayList<>();
         this.listaCompras = new ArrayList<>();
+        this.notificaciones = new ArrayList<>();
     }
 
     // Getters y Setters
@@ -82,6 +85,10 @@ public class Usuario {
         this.listaCompras = listaCompras;
     }
 
+    public List<String> getNotificaciones() {
+        return notificaciones;
+    }
+
     public Rol getRol() {
         if (this instanceof Administrador) {
             return Rol.ADMINISTRADOR;
@@ -97,5 +104,17 @@ public class Usuario {
 
     public void eliminarMetodoPago(MetodoPago metodoPago) {
         this.listaMetodosPago.remove(metodoPago);
+    }
+
+    /**
+     * Implementación del patrón Observer.
+     * Este método es llamado por los sujetos a los que el usuario está suscrito.
+     *
+     * @param mensaje El mensaje de notificación.
+     */
+    @Override
+    public void actualizar(String mensaje) {
+        this.notificaciones.add(mensaje);
+        System.out.println("Notificación para " + this.nombre + ": " + mensaje);
     }
 }

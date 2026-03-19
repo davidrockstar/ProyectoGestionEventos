@@ -2,6 +2,8 @@ package co.edu.uniquindio.proyectogestioneventos.service;
 
 import co.edu.uniquindio.proyectogestioneventos.model.*;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
+import co.edu.uniquindio.proyectogestioneventos.pago.IPago;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,19 +20,19 @@ public interface ICompraService {
 
     /**
      * RF-009: Agrega un servicio adicional a la compra.
+     * NOTA: Este método es obsoleto debido a la implementación del patrón Decorator.
      */
-    void agregarServicioAdicional(Compra compra, ServicioAdicional servicio);
+    // void agregarServicioAdicional(Compra compra, ServicioAdicional servicio);
 
     /**
-     * RF-006: Cancela una compra antes del pago.
+     * RF-006: Cancela una compra. La lógica varía según el estado de la compra.
      */
     void cancelarCompra(Compra compra);
 
     /**
-     * RF-007: Procesa el pago de la compra.
+     * RF-007: Procesa el pago de la compra utilizando una estrategia de pago.
      */
-    // Se omite ComprobantePago por simplicidad en esta fase
-    void realizarPago(Compra compra, MetodoPago metodoPago) throws Exception;
+    void realizarPago(Compra compra, IPago metodoPago) throws Exception;
 
     /**
      * RF-010: Consulta el historial de compras de un usuario.

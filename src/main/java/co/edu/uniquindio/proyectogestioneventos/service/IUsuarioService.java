@@ -20,4 +20,9 @@ public interface IUsuarioService {
      * RF-002: Actualiza el perfil de un usuario existente.
      */
     Usuario actualizarPerfil(String idUsuario, String nuevoNombre, String nuevoEmail, String contrasenaActual, String nuevaContrasena) throws Exception;
+
+    /**
+     * Obtiene un usuario por su ID.
+     */
+    Optional<Usuario> obtenerUsuario(String idUsuario);
 }

@@ -1,10 +1,14 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoEvento;
+import co.edu.uniquindio.proyectogestioneventos.model.observer.IObservador;
+import co.edu.uniquindio.proyectogestioneventos.model.observer.ISujeto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Evento {
+public class Evento implements ISujeto {
     private String idEvento;
     private String nombre;
     private String categoria;
@@ -13,6 +17,7 @@ public class Evento {
     private LocalDateTime fechaHora;
     private EstadoEvento estado;
     private Recinto recinto;
+    private List<IObservador> observadores; // Lista de observadores
 
     public Evento(String idEvento, String nombre, String categoria, String descripcion, String ciudad, LocalDateTime fechaHora, EstadoEvento estado, Recinto recinto) {
         this.idEvento = idEvento;
@@ -23,6 +28,7 @@ public class Evento {
         this.fechaHora = fechaHora;
         this.estado = estado;
         this.recinto = recinto;
+        this.observadores = new ArrayList<>();
     }
 
     public String getIdEvento() {
@@ -78,7 +84,10 @@ public class Evento {
     }
 
     public void setEstado(EstadoEvento estado) {
-        this.estado = estado;
+        if (this.estado != estado) { // Solo notificar si el estado realmente cambia
+            this.estado = estado;
+            notificarObservadores("El estado del evento '" + this.nombre + "' ha cambiado a: " + estado);
+        }
     }
 
     public Recinto getRecinto() {
@@ -87,5 +96,22 @@ public class Evento {
 
     public void setRecinto(Recinto recinto) {
         this.recinto = recinto;
+    }
+
+    @Override
+    public void agregarObservador(IObservador observador) {
+        this.observadores.add(observador);
+    }
+
+    @Override
+    public void eliminarObservador(IObservador observador) {
+        this.observadores.remove(observador);
+    }
+
+    @Override
+    public void notificarObservadores(String mensaje) {
+        for (IObservador observador : observadores) {
+            observador.actualizar(mensaje);
+        }
     }
 }

@@ -18,7 +18,7 @@ public class ReporteServiceImpl implements IReporteService {
                 writer.append(compra.getIdCompra()).append(',')
                         .append(compra.getFechaCreacion().toLocalDate().toString()).append(',')
                         .append(compra.getEvento().getNombre()).append(',')
-                        .append(String.valueOf(compra.getTotal())).append(',')
+                        .append(String.valueOf(compra.getPrecioTotal())).append(',')
                         .append(compra.getEstado().toString()).append('\n');
             }
         }
