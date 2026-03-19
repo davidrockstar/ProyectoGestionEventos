@@ -32,9 +32,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     @Override
     public Usuario actualizarPerfil(String idUsuario, String nuevoNombre, String nuevoEmail, String contrasenaActual, String nuevaContrasena) throws Exception {
-        Usuario usuario = Taquilla.getInstance().getUsuarios().stream()
-                .filter(u -> u.getIdUsuario().equals(idUsuario))
-                .findFirst()
+        Usuario usuario = obtenerUsuario(idUsuario)
                 .orElseThrow(() -> new Exception("Usuario no encontrado."));
 
         if (!usuario.getContrasena().equals(contrasenaActual)) {
@@ -43,7 +41,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
         // Validar que el nuevo email no esté ya en uso por otro usuario
         if (nuevoEmail != null && !nuevoEmail.isEmpty() && !nuevoEmail.equalsIgnoreCase(usuario.getEmail())) {
-            if (Taquilla.getInstance().getUsuarios().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(nuevoEmail))) {
+            if (Taquilla.getInstance().getUsuarios().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(nuevoEmail) && !u.getIdUsuario().equals(idUsuario))) {
                 throw new Exception("El nuevo email ya está registrado por otro usuario.");
             }
             usuario.setEmail(nuevoEmail);
@@ -58,5 +56,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
         }
 
         return usuario;
+    }
+
+    @Override
+    public Optional<Usuario> obtenerUsuario(String idUsuario) {
+        return Taquilla.getInstance().getUsuarios().stream()
+                .filter(u -> u.getIdUsuario().equals(idUsuario))
+                .findFirst();
     }
 }
