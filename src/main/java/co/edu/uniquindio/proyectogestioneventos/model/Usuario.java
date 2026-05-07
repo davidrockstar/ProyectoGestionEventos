@@ -89,10 +89,12 @@ public class Usuario implements IObservador {
         return notificaciones;
     }
 
+    /**
+     * Obtiene el rol del usuario.
+     * Por defecto, una instancia de Usuario actúa como CLIENTE.
+     * @return Rol.CLIENTE
+     */
     public Rol getRol() {
-        if (this instanceof Administrador) {
-            return Rol.ADMINISTRADOR;
-        }
         return Rol.CLIENTE;
     }
 

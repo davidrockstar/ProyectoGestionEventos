@@ -3,22 +3,22 @@ package co.edu.uniquindio.proyectogestioneventos.model;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.TipoMetodoPago;
 
 public class MetodoPago {
-    private String id;
+    private String idMetodoPago;
     private TipoMetodoPago tipo;
     private String detalles;
 
-    public MetodoPago(String id, TipoMetodoPago tipo, String detalles) {
-        this.id = id;
+    public MetodoPago(String idMetodoPago, TipoMetodoPago tipo, String detalles) {
+        this.idMetodoPago = idMetodoPago;
         this.tipo = tipo;
         this.detalles = detalles;
     }
 
-    public String getId() {
-        return id;
+    public String getIdMetodoPago() {
+        return idMetodoPago;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setIdMetodoPago(String idMetodoPago) {
+        this.idMetodoPago = idMetodoPago;
     }
 
     public TipoMetodoPago getTipo() {

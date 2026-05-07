@@ -31,10 +31,15 @@ public class Compra implements Comprable, ISujeto {
         this.listaEntradas = new ArrayList<>();
         this.listaServiciosAdicionales = new ArrayList<>();
         this.observadores = new ArrayList<>();
-        setEstado(estado); // Inicializa tanto el enum como el objeto de estado
-        if (usuario instanceof IObservador) {
-            this.agregarObservador((IObservador) usuario);
+
+        // Sincronizar relación bidireccional con Usuario
+        if (usuario != null) {
+            usuario.getListaCompras().add(this);
+            // Todo Usuario es un IObservador, se agrega antes de setEstado para recibir la notificación inicial
+            this.agregarObservador(usuario);
         }
+
+        setEstado(estado); // Inicializa estado y notifica a observadores ya registrados
     }
 
     // Getters y Setters
@@ -62,9 +67,12 @@ public class Compra implements Comprable, ISujeto {
             // Sincroniza el objeto de estado con el enum
             switch (nuevoEstado) {
                 case CREADA:
+                case PENDIENTE:
+                case INCIDENCIA:
                     this.estadoInterno = new EstadoCreada();
                     break;
                 case PAGADA:
+                case CONFIRMADA:
                     this.estadoInterno = new EstadoPagada();
                     break;
                 case CANCELADA:
@@ -73,6 +81,8 @@ public class Compra implements Comprable, ISujeto {
                 case REEMBOLSADA:
                     this.estadoInterno = new EstadoReembolsada();
                     break;
+                default:
+                    this.estadoInterno = new EstadoCreada();
             }
             notificarObservadores("El estado de su compra " + this.idCompra + " ha cambiado a: " + nuevoEstado);
         }
