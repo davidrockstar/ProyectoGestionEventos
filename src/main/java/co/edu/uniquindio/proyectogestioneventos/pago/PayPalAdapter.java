@@ -11,9 +11,8 @@ public class PayPalAdapter implements IPago {
 
     @Override
     public boolean procesarPago(double monto) {
+        // Adaptamos el método realizarCobro (void) de PayPal al contrato IPago (boolean)
         payPalGateway.realizarCobro(monto);
-        // La API de PayPal no devuelve un booleano, así que asumimos éxito.
-        // En un caso real, podríamos manejar excepciones aquí.
-        return true;
+        return true; // Asumimos éxito a menos que la pasarela lance excepción
     }
 }
