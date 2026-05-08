@@ -18,12 +18,12 @@
       </Label>
       <TableView fx:id="tablaEventos" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="150.0">
         <columns>
-          <TableColumn prefWidth="150.0" text="Nombre" />
-          <TableColumn prefWidth="100.0" text="Categoría" />
-            <TableColumn prefWidth="120.0" text="Ciudad" />
-            <TableColumn prefWidth="150.0" text="Fecha y Hora" />
-            <TableColumn prefWidth="120.0" text="Recinto" />
-            <TableColumn prefWidth="70.0" text="Precio Base" />
+          <TableColumn fx:id="colNombre" prefWidth="150.0" text="Nombre" />
+          <TableColumn fx:id="colCategoria" prefWidth="100.0" text="Categoría" />
+            <TableColumn fx:id="colCiudad" prefWidth="120.0" text="Ciudad" />
+            <TableColumn fx:id="colFecha" prefWidth="150.0" text="Fecha y Hora" />
+            <TableColumn fx:id="colRecinto" prefWidth="120.0" text="Recinto" />
+            <TableColumn fx:id="colEstado" prefWidth="100.0" text="Estado" />
         </columns>
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

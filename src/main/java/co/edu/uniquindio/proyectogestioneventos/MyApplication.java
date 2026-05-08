@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyectogestioneventos;
 
+import co.edu.uniquindio.proyectogestioneventos.viewcontroller.AdminDashboardViewController;
 import co.edu.uniquindio.proyectogestioneventos.viewcontroller.AdministradorViewController;
 import co.edu.uniquindio.proyectogestioneventos.viewcontroller.UsuarioViewController;
 import co.edu.uniquindio.proyectogestioneventos.datautil.DataUtil;
@@ -81,10 +82,10 @@ public class MyApplication extends Application {
             Scene scene = new Scene(root);
 
             Object controller = fxmlLoader.getController();
-            if (controller instanceof AdministradorViewController) {
-                ((AdministradorViewController) controller).setUsuario(usuario);
-            } else if (controller instanceof UsuarioViewController) { // Añadido para manejar el caso de que el admin use la vista de usuario
-                ((UsuarioViewController) controller).setUsuario(usuario);
+            // El controlador para AdminDashboardView.fxml es AdminDashboardViewController
+            // AdministradorViewController es un controlador genérico o una clase base, no el controlador específico del dashboard
+            if (controller instanceof AdminDashboardViewController) {
+                ((AdminDashboardViewController) controller).setUsuario(usuario);
             }
 
             mainStage.setTitle("Gestión de Eventos - Panel de Administrador");

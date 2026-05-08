@@ -7,6 +7,7 @@ import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,8 +15,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
@@ -38,6 +41,8 @@ public class HistorialComprasController {
     private AnchorPane rootPane;
     @FXML
     private TableView<Compra> tablaCompras;
+    @FXML private TableColumn<Compra, String> colId, colEvento, colFecha, colEstado;
+    @FXML private TableColumn<Compra, Double> colTotal;
     @FXML
     private DatePicker campoFecha;
     @FXML
@@ -47,15 +52,23 @@ public class HistorialComprasController {
 
     public void setUsuario(Usuario usuario) {
         this.usuarioActual = usuario;
-        initialize(); // Cargar datos después de setear el usuario
+        cargarHistorial();
     }
 
     @FXML
     private void initialize() {
-        if (usuarioActual != null) {
-            cbEstado.setItems(FXCollections.observableArrayList(EstadoCompra.values()));
-            cargarHistorial();
+        if (tablaCompras == null || colId == null) {
+            return; // Prevenir inicialización si el FXML no está listo
         }
+
+        cbEstado.setItems(FXCollections.observableArrayList(EstadoCompra.values()));
+
+        colId.setCellValueFactory(new PropertyValueFactory<>("idCompra"));
+        colEvento.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvento().getNombre()));
+        colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
+        colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+
         // Añadir listener para la tecla ESC al panel raíz
         rootPane.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {

@@ -21,10 +21,10 @@
             </Label>
             <TableView fx:id="tablaRecintos" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn prefWidth="75.0" text="ID Recinto" />
-                <TableColumn prefWidth="200.0" text="Nombre" />
-                  <TableColumn prefWidth="250.0" text="Dirección" />
-                  <TableColumn prefWidth="150.0" text="Ciudad" />
+                <TableColumn fx:id="colIdRecinto" prefWidth="75.0" text="ID Recinto" />
+                <TableColumn fx:id="colNombre" prefWidth="200.0" text="Nombre" />
+                  <TableColumn fx:id="colDireccion" prefWidth="250.0" text="Dirección" />
+                  <TableColumn fx:id="colCiudad" prefWidth="150.0" text="Ciudad" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

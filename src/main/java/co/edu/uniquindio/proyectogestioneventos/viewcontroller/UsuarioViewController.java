@@ -59,8 +59,10 @@ public class UsuarioViewController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "perfilUsuarioView.fxml"));
             Parent root = loader.load();
 
-            PerfilUsuarioController controller = loader.getController();
-            controller.setUsuario(this.usuarioActual);
+            Object controller = loader.getController();
+            if (controller instanceof PerfilUsuarioController) {
+                ((PerfilUsuarioController) controller).setUsuario(this.usuarioActual);
+            }
 
             Stage stage = new Stage();
             stage.setTitle("Gestionar Perfil");

@@ -46,6 +46,8 @@ public class ExplorarEventosController {
     @FXML
     private TableColumn<Evento, String> colRecinto;
     @FXML
+    private TableColumn<Evento, String> colEstado;
+    @FXML
     private DatePicker campoFecha;
     @FXML
     private TextField campoCiudad;
@@ -60,7 +62,15 @@ public class ExplorarEventosController {
         colCategoria.setCellValueFactory(new PropertyValueFactory<>("categoria"));
         colCiudad.setCellValueFactory(new PropertyValueFactory<>("ciudad"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaHora"));
-        colRecinto.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRecinto().getNombre()));
+        
+        // Vinculaciones personalizadas para objetos anidados o Enums
+        colRecinto.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getRecinto() != null ? cellData.getValue().getRecinto().getNombre() : "N/A"));
+        
+        if (colEstado != null) {
+            colEstado.setCellValueFactory(cellData -> 
+                new SimpleStringProperty(cellData.getValue().getEstado() != null ? cellData.getValue().getEstado().toString() : "N/A"));
+        }
 
         cargarEventos(eventoService.listarEventosDisponibles());
 
@@ -93,18 +103,35 @@ public class ExplorarEventosController {
         Evento eventoSeleccionado = tablaEventos.getSelectionModel().getSelectedItem();
         if (eventoSeleccionado != null) {
             try {
-                Usuario usuario = MyApplication.getUsuarioLogueado();
-                String basePath = (usuario instanceof Administrador) ? "administrador/" : "cliente/";
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "DetalleEventoView.fxml"));
+                Usuario usuarioLogueado = MyApplication.getUsuarioLogueado();
+                // Si por alguna razón no hay usuario (sesión expirada), asumimos cliente o redirigimos
+                String basePath = (usuarioLogueado instanceof Administrador) ? "administrador/" : "cliente/";
+                
+                String resourcePath = "/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "DetalleEventoView.fxml";
+                java.net.URL resource = getClass().getResource(resourcePath);
+                
+                if (resource == null) {
+                    throw new IOException("No se pudo encontrar el archivo FXML en: " + resourcePath);
+                }
+
+                FXMLLoader loader = new FXMLLoader(resource);
+                
                 Parent root = loader.load();
-                DetalleEventoController controller = loader.getController();
-                controller.setEvento(eventoSeleccionado);
+                
+                // Obtener el controlador de la vista de detalle y pasar el modelo
+                Object controller = loader.getController();
+                if (controller instanceof DetalleEventoController) {
+                    ((DetalleEventoController) controller).setEvento(eventoSeleccionado);
+                }
 
                 Stage stage = new Stage();
-                stage.setTitle("Detalle del Evento");
+                stage.setTitle("Detalle del Evento - " + eventoSeleccionado.getNombre());
                 stage.setScene(new Scene(root));
                 stage.initModality(Modality.APPLICATION_MODAL);
-                stage.initOwner(((Stage)((javafx.scene.control.Button)event.getSource()).getScene().getWindow()));
+                
+                // Obtener el stage actual para centrar la ventana emergente
+                Stage currentStage = (Stage) rootPane.getScene().getWindow();
+                stage.initOwner(currentStage);
                 stage.showAndWait();
             } catch (IOException e) {
                 e.printStackTrace();
