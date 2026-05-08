@@ -1,6 +1,11 @@
 package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.model.Compra;
+import co.edu.uniquindio.proyectogestioneventos.model.ServicioAdicional;
+import co.edu.uniquindio.proyectogestioneventos.model.decorator.Comprable;
+import co.edu.uniquindio.proyectogestioneventos.model.decorator.VIPDecorator;
+import co.edu.uniquindio.proyectogestioneventos.model.decorator.MerchandisingDecorator;
+import co.edu.uniquindio.proyectogestioneventos.model.decorator.SeguroDecorator;
 import co.edu.uniquindio.proyectogestioneventos.pago.IPago;
 import co.edu.uniquindio.proyectogestioneventos.pago.PayPalAdapter;
 import co.edu.uniquindio.proyectogestioneventos.pago.externo.PayPalGateway;
@@ -57,22 +62,35 @@ public class DetalleCompraController {
         lblEvento.setText(compraActual.getEvento().getNombre());
         lblFechaCreacion.setText(compraActual.getFechaCreacion().toLocalDate().toString());
         lblEstado.setText(compraActual.getEstado().toString());
-        // Construir strings de entradas y servicios
+
+        // Construir string de entradas
         StringBuilder entradasStr = new StringBuilder();
         compraActual.getListaEntradas().forEach(entrada ->
                 entradasStr.append("Zona: ").append(entrada.getZona().getNombre())
-                        .append(", Asiento: ").append(entrada.getAsiento().getFila()).append(entrada.getAsiento().getNumero())
+                        .append(", Asiento: ").append(entrada.getAsiento() != null ? entrada.getAsiento().getFila() + entrada.getAsiento().getNumero() : "N/A")
                         .append(", Precio: $").append(entrada.getPrecioFinal()).append("\n")
         );
         txtEntradas.setText(entradasStr.toString());
 
+        // Re-aplicar decoradores para calcular el precio total y obtener la descripción completa
+        Comprable comprableDecorado = compraActual; // La compra base es el primer Comprable
         StringBuilder serviciosStr = new StringBuilder();
-        compraActual.getListaServiciosAdicionales().forEach(servicio ->
-                serviciosStr.append(servicio.getNombre()).append(": $").append(servicio.getPrecio()).append("\n")
-        );
+
+        for (ServicioAdicional servicio : compraActual.getListaServiciosAdicionales()) {
+            if ("Acceso VIP".equalsIgnoreCase(servicio.getNombre())) {
+                comprableDecorado = new VIPDecorator(comprableDecorado);
+                serviciosStr.append("Acceso VIP (+$50.0)\n");
+            } else if ("Seguro de Cancelación".equalsIgnoreCase(servicio.getNombre())) {
+                comprableDecorado = new SeguroDecorator(comprableDecorado);
+                serviciosStr.append("Seguro de Cancelación (5%)\n");
+            } else if ("Merchandising Oficial".equalsIgnoreCase(servicio.getNombre())) {
+                comprableDecorado = new MerchandisingDecorator(comprableDecorado);
+                serviciosStr.append("Kit Merchandising (+$25.0)\n");
+            }
+        }
         txtServicios.setText(serviciosStr.toString());
 
-        lblTotal.setText("$ " + String.format("%.2f", compraActual.getPrecioTotal()));
+        lblTotal.setText("$ " + String.format("%.2f", comprableDecorado.getPrecioTotal()));
     }
 
     @FXML

@@ -21,11 +21,11 @@
             </Label>
             <TableView fx:id="tablaUsuarios" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn prefWidth="75.0" text="ID Usuario" />
-                <TableColumn prefWidth="150.0" text="Nombre" />
-                  <TableColumn prefWidth="200.0" text="Email" />
-                  <TableColumn prefWidth="100.0" text="Teléfono" />
-                  <TableColumn prefWidth="100.0" text="Rol" />
+                <TableColumn fx:id="colID" prefWidth="75.0" text="ID Usuario" />
+                <TableColumn fx:id="colNombre" prefWidth="150.0" text="Nombre" />
+                  <TableColumn fx:id="colEmail" prefWidth="200.0" text="Email" />
+                  <TableColumn fx:id="colTelefono" prefWidth="100.0" text="Teléfono" />
+                  <TableColumn fx:id="colRol" prefWidth="100.0" text="Rol" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

@@ -3,21 +3,29 @@ package co.edu.uniquindio.proyectogestioneventos.controller;
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
 import co.edu.uniquindio.proyectogestioneventos.model.Compra;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MisComprasController {
 
@@ -28,6 +36,8 @@ public class MisComprasController {
     private AnchorPane rootPane;
     @FXML
     private TableView<Compra> tablaMisCompras;
+    @FXML private TableColumn<Compra, String> colId, colEvento, colFecha, colEstado;
+    @FXML private TableColumn<Compra, Double> colTotal;
 
     public void setUsuario(Usuario usuario) {
         this.usuarioActual = usuario;
@@ -35,13 +45,25 @@ public class MisComprasController {
     }
 
     private void cargarComprasActivas() {
-        // Filtrar compras por estado PENDIENTE o CREADA
-        // List<Compra> comprasActivas = compraService.obtenerComprasActivas(usuarioActual);
-        // tablaMisCompras.getItems().setAll(comprasActivas);
+        if (usuarioActual != null) {
+            List<Compra> historial = compraService.obtenerHistorialCompras(usuarioActual, null, null, null);
+            List<Compra> activas = historial.stream()
+                    .filter(c -> c.getEstado() == EstadoCompra.CREADA || 
+                                 c.getEstado() == EstadoCompra.PENDIENTE || 
+                                 c.getEstado() == EstadoCompra.INCIDENCIA)
+                    .collect(Collectors.toList());
+            tablaMisCompras.setItems(FXCollections.observableArrayList(activas));
+        }
     }
 
     @FXML
     private void initialize() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("idCompra"));
+        colEvento.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvento().getNombre()));
+        colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
+        colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+
         // Añadir listener para la tecla ESC al panel raíz
         rootPane.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
@@ -63,18 +85,19 @@ public class MisComprasController {
     void onCancelarCompraClick(ActionEvent event) {
         Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
         if (compraSeleccionada != null) {
-            System.out.println("Cancelar compra: " + compraSeleccionada.getIdCompra());
-            // Lógica para cancelar compra (RF-006)
+            compraService.cancelarCompra(compraSeleccionada);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Compra Cancelada");
+            alert.setContentText("La compra ha sido cancelada y los asientos liberados.");
+            alert.showAndWait();
+            cargarComprasActivas();
         }
     }
 
     @FXML
     void onPagarCompraClick(ActionEvent event) {
-        Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
-        if (compraSeleccionada != null) {
-            System.out.println("Pagar compra: " + compraSeleccionada.getIdCompra());
-            // Lógica para abrir pantalla de pago (RF-007)
-        }
+        // Reutilizamos el detalle para proceder al pago
+        onVerDetalleCompraClick(event);
     }
 
     @FXML
@@ -93,7 +116,8 @@ public class MisComprasController {
                 stage.setTitle("Detalle de la Compra");
                 stage.setScene(new Scene(root));
                 stage.initModality(Modality.APPLICATION_MODAL);
-                stage.initOwner(((Stage)((javafx.scene.control.Button)event.getSource()).getScene().getWindow()));
+                // Usar el rootPane para obtener la ventana propietaria de forma más robusta
+                stage.initOwner(rootPane.getScene().getWindow());
                 stage.showAndWait();
             } catch (IOException e) {
                 e.printStackTrace();

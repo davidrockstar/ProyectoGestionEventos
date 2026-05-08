@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyectogestioneventos.datautil;
 import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
 import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
+import co.edu.uniquindio.proyectogestioneventos.utils.DatosIniciales;
 
 public class DataUtil {
 
@@ -28,6 +29,9 @@ public class DataUtil {
                 "123"
         );
         taquilla.agregarUsuario(cliente);
+
+        // Cargar recintos y eventos de prueba obligatorios
+        DatosIniciales.cargar();
 
         return taquilla;
     }

@@ -41,10 +41,23 @@ public class CompraFacade {
             for (String servicio : serviciosAdicionales) {
                 if ("VIP".equalsIgnoreCase(servicio)) {
                     compraDecorada = new VIPDecorator(compraDecorada);
+                    // Añadir el servicio adicional a la lista de la compra base para su posterior visualización
+                    Taquilla.getInstance().getServicios().stream()
+                            .filter(s -> s.getNombre().equalsIgnoreCase("Acceso VIP"))
+                            .findFirst()
+                            .ifPresent(compraBase.getListaServiciosAdicionales()::add);
                 } else if ("SEGURO".equalsIgnoreCase(servicio)) {
                     compraDecorada = new SeguroDecorator(compraDecorada);
+                    Taquilla.getInstance().getServicios().stream()
+                            .filter(s -> s.getNombre().equalsIgnoreCase("Seguro de Cancelación"))
+                            .findFirst()
+                            .ifPresent(compraBase.getListaServiciosAdicionales()::add);
                 } else if ("MERCHANDISING".equalsIgnoreCase(servicio)) {
                     compraDecorada = new MerchandisingDecorator(compraDecorada);
+                    Taquilla.getInstance().getServicios().stream()
+                            .filter(s -> s.getNombre().equalsIgnoreCase("Merchandising Oficial"))
+                            .findFirst()
+                            .ifPresent(compraBase.getListaServiciosAdicionales()::add);
                 }
             }
         }

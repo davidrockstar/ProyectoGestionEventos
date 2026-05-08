@@ -7,6 +7,7 @@ import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.IUsuarioService;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 public class UsuarioServiceImpl implements IUsuarioService {
@@ -63,5 +64,19 @@ public class UsuarioServiceImpl implements IUsuarioService {
         return Taquilla.getInstance().getUsuarios().stream()
                 .filter(u -> u.getIdUsuario().equals(idUsuario))
                 .findFirst();
+    }
+
+    @Override
+    public List<Usuario> listarUsuarios() {
+        return Taquilla.getInstance().getUsuarios();
+    }
+
+    @Override
+    public void eliminarUsuario(String idUsuario) throws Exception {
+        Usuario u = obtenerUsuario(idUsuario).orElseThrow(() -> new Exception("Usuario no encontrado"));
+        if (u.getRol() == Rol.ADMINISTRADOR && listarUsuarios().stream().filter(user -> user.getRol() == Rol.ADMINISTRADOR).count() <= 1) {
+            throw new Exception("No se puede eliminar al único administrador.");
+        }
+        Taquilla.getInstance().getUsuarios().remove(u);
     }
 }

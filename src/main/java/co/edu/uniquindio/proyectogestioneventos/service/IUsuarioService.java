@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyectogestioneventos.service;
 
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
+import java.util.List;
 
 import java.util.Optional;
 
@@ -25,4 +26,14 @@ public interface IUsuarioService {
      * Obtiene un usuario por su ID.
      */
     Optional<Usuario> obtenerUsuario(String idUsuario);
+
+    /**
+     * Obtiene la lista de todos los usuarios (Admin).
+     */
+    List<Usuario> listarUsuarios();
+
+    /**
+     * Elimina un usuario del sistema (Admin).
+     */
+    void eliminarUsuario(String idUsuario) throws Exception;
 }
