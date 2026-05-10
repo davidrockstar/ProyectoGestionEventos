@@ -1,96 +1,236 @@
 package co.edu.uniquindio.proyectogestioneventos.viewcontroller;
 
-import co.edu.uniquindio.proyectogestioneventos.model.Compra;
+import co.edu.uniquindio.proyectogestioneventos.MyApplication;
+import co.edu.uniquindio.proyectogestioneventos.controller.DetalleCompraController;
+import co.edu.uniquindio.proyectogestioneventos.model.*;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoAsiento;
+import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
+import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
+import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.List;
 
 public class GestionComprasAdminViewController {
 
-    @FXML
-    private TableView<Compra> tablaCompras;
+    @FXML private AnchorPane rootPane;
+    @FXML private TableView<Compra> tablaCompras;
+    @FXML private TableColumn<Compra, String> colId, colUsuario, colEvento, colFecha, colEstado;
+    @FXML private TableColumn<Compra, Double> colTotal;
+
+    private final ICompraService compraService = new CompraServiceImpl();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
-    private void initialize() {
-        // Aquí se inicializarían las columnas de la tabla y se cargarían las compras
-        // Por ahora, solo un placeholder
-        System.out.println("GestionComprasAdminView inicializada.");
+    public void initialize() {
+        configurarTabla();
+        actualizarTabla();
     }
 
-    @FXML
-    void onVerDetalleClick(ActionEvent event) {
-        Compra compraSeleccionada = tablaCompras.getSelectionModel().getSelectedItem();
-        if (compraSeleccionada != null) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/DetalleCompraAdminView.fxml"));
-                Parent root = loader.load();
-                DetalleCompraAdminViewController controller = loader.getController();
-                // controller.setCompra(compraSeleccionada); // Pasar la compra seleccionada
+    private void configurarTabla() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("idCompra"));
+        
+        // Obtener nombre del usuario desde el objeto Compra
+        colUsuario.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getUsuario() != null ? 
+                cellData.getValue().getUsuario().getNombre() : "N/A"));
 
-                Stage stage = new Stage();
-                stage.setTitle("Detalle de Compra (Admin)");
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.initOwner(((Stage)((javafx.scene.control.Button)event.getSource()).getScene().getWindow()));
-                stage.showAndWait();
-            } catch (IOException e) {
-                e.printStackTrace();
-                mostrarAlerta("Error", "No se pudo cargar la ventana", "Hubo un error al intentar abrir el detalle de compra.", Alert.AlertType.ERROR);
-            }
-        } else {
-            mostrarAlerta("Advertencia", "Ver Detalle", "Por favor, seleccione una compra para ver su detalle.", Alert.AlertType.WARNING);
+        // Obtener nombre del evento
+        colEvento.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getEvento() != null ? 
+                cellData.getValue().getEvento().getNombre() : "N/A"));
+
+        // Formatear fecha
+        colFecha.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getFechaCreacion() != null ? 
+                cellData.getValue().getFechaCreacion().format(formatter) : "N/A"));
+
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
+        
+        colEstado.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+    }
+
+    private void actualizarTabla() {
+        List<Compra> lista = compraService.listarTodasLasCompras();
+        if (lista.isEmpty()) {
+            generarDatosPrueba();
+            lista = compraService.listarTodasLasCompras();
+        }
+        tablaCompras.setItems(FXCollections.observableArrayList(lista));
+    }
+
+    private void generarDatosPrueba() {
+        // Buscar un usuario y un evento para simular la compra
+        Taquilla taquilla = Taquilla.getInstance();
+        if (!taquilla.getUsuarios().isEmpty() && !taquilla.getEventos().isEmpty()) {
+            Usuario user = taquilla.getUsuarios().get(0);
+            Evento ev = taquilla.getEventos().get(0);
+            compraService.crearCompra(user, ev, new ArrayList<>());
         }
     }
 
     @FXML
-    void onReasignarAsientoClick(ActionEvent event) {
-        Compra compraSeleccionada = tablaCompras.getSelectionModel().getSelectedItem();
-        if (compraSeleccionada != null) {
-            mostrarAlerta("Información", "Reasignar Asiento", "Funcionalidad para reasignar asiento no implementada.", Alert.AlertType.INFORMATION);
-        } else {
-            mostrarAlerta("Advertencia", "Reasignar Asiento", "Por favor, seleccione una compra para reasignar un asiento.", Alert.AlertType.WARNING);
+    void onVerDetalleClick(ActionEvent event) {
+        Compra seleccionada = tablaCompras.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            mostrarAlerta("Advertencia", "Seleccione una compra para ver el detalle.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        if (seleccionada != null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/DetalleCompraView.fxml"));
+                Parent root = loader.load();
+                
+                DetalleCompraController controller = loader.getController();
+                controller.setCompra(seleccionada);
+
+                Stage stage = new Stage();
+                stage.setTitle("Detalle de Compra - Admin");
+                stage.setScene(new Scene(root));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.initOwner(rootPane.getScene().getWindow());
+                stage.showAndWait();
+                actualizarTabla();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @FXML
     void onCancelarCompraClick(ActionEvent event) {
-        Compra compraSeleccionada = tablaCompras.getSelectionModel().getSelectedItem();
-        if (compraSeleccionada != null) {
-            mostrarAlerta("Información", "Cancelar Compra", "Funcionalidad para cancelar compra no implementada.", Alert.AlertType.INFORMATION);
-        } else {
-            mostrarAlerta("Advertencia", "Cancelar Compra", "Por favor, seleccione una compra para cancelar.", Alert.AlertType.WARNING);
+        Compra seleccionada = tablaCompras.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            mostrarAlerta("Advertencia", "Seleccione una compra para cancelar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar Cancelación");
+        confirm.setHeaderText("¿Está seguro de cancelar la compra " + seleccionada.getIdCompra() + "?");
+        confirm.setContentText("Esta acción cambiará el estado a CANCELADA y liberará los asientos correspondientes.");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            compraService.cancelarCompra(seleccionada);
+            actualizarTabla();
+            mostrarAlerta("Éxito", "La compra ha sido cancelada.", Alert.AlertType.INFORMATION);
+        }
+    }
+
+    @FXML
+    void onReasignarAsientoClick(ActionEvent event) {
+        Compra seleccionada = tablaCompras.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            mostrarAlerta("Advertencia", "Seleccione una compra para reasignar asientos.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        if (seleccionada.getListaEntradas().isEmpty()) {
+            mostrarAlerta("Error", "La compra seleccionada no tiene entradas asociadas.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        // 1. Seleccionar la entrada a modificar
+        List<Entrada> entradas = seleccionada.getListaEntradas();
+        ChoiceDialog<Entrada> dialogEntrada = new ChoiceDialog<>(entradas.get(0), entradas);
+        dialogEntrada.setTitle("Reasignar Asiento");
+        dialogEntrada.setHeaderText("Paso 1: Seleccione la entrada");
+        dialogEntrada.setContentText("Entrada:");
+
+        Optional<Entrada> resultEntrada = dialogEntrada.showAndWait();
+        if (resultEntrada.isPresent()) {
+            Entrada entrada = resultEntrada.get();
+            
+            // 2. Buscar asientos disponibles en la misma zona
+            if (entrada.getZona() == null || entrada.getZona().getListaAsientos() == null) {
+                mostrarAlerta("Error", "La zona de esta entrada no tiene asientos configurados.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            List<Asiento> disponibles = entrada.getZona().getListaAsientos().stream()
+                    .filter(a -> a.getEstado() == EstadoAsiento.DISPONIBLE)
+                    .collect(Collectors.toList());
+
+            if (disponibles.isEmpty()) {
+                mostrarAlerta("Sin Disponibilidad", "No hay más asientos disponibles en la zona: " + entrada.getZona().getNombre(), Alert.AlertType.WARNING);
+                return;
+            }
+
+            // 3. Seleccionar el nuevo asiento
+            ChoiceDialog<Asiento> dialogAsiento = new ChoiceDialog<>(disponibles.get(0), disponibles);
+            dialogAsiento.setTitle("Reasignar Asiento");
+            dialogAsiento.setHeaderText("Paso 2: Seleccione el nuevo asiento para " + entrada.getZona().getNombre());
+            dialogAsiento.setContentText("Nuevo Asiento:");
+
+            Optional<Asiento> resultAsiento = dialogAsiento.showAndWait();
+            if (resultAsiento.isPresent()) {
+                try {
+                    compraService.reasignarAsiento(seleccionada, entrada, (Asiento) resultAsiento.get());
+                    actualizarTabla();
+                    mostrarAlerta("Éxito", "Asiento reasignado correctamente.", Alert.AlertType.INFORMATION);
+                } catch (Exception e) {
+                    mostrarAlerta("Error", e.getMessage(), Alert.AlertType.ERROR);
+                }
+            }
         }
     }
 
     @FXML
     void onRegistrarReembolsoClick(ActionEvent event) {
-        Compra compraSeleccionada = tablaCompras.getSelectionModel().getSelectedItem();
-        if (compraSeleccionada != null) {
-            mostrarAlerta("Información", "Registrar Reembolso", "Funcionalidad para registrar reembolso no implementada.", Alert.AlertType.INFORMATION);
-        } else {
-            mostrarAlerta("Advertencia", "Registrar Reembolso", "Por favor, seleccione una compra para registrar un reembolso.", Alert.AlertType.WARNING);
+        Compra seleccionada = tablaCompras.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            mostrarAlerta("Advertencia", "Seleccione una compra para registrar el reembolso.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar Reembolso");
+        confirm.setHeaderText("¿Está seguro de procesar el reembolso de la compra " + seleccionada.getIdCompra() + "?");
+        confirm.setContentText("El estado cambiará a REEMBOLSADA y los asientos quedarán DISPONIBLES.");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                compraService.registrarReembolso(seleccionada);
+                actualizarTabla();
+                mostrarAlerta("Éxito", "Reembolso registrado y asientos liberados.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                mostrarAlerta("Error", e.getMessage(), Alert.AlertType.ERROR);
+            }
         }
     }
 
     @FXML
     void onVolverClick(ActionEvent event) {
-        Stage stage = (Stage) tablaCompras.getScene().getWindow();
-        stage.close();
+        ((Stage) rootPane.getScene().getWindow()).close();
     }
 
-    private void mostrarAlerta(String titulo, String encabezado, String contenido, Alert.AlertType tipo) {
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
-        alert.setHeaderText(encabezado);
-        alert.setContentText(contenido);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
         alert.showAndWait();
     }
 }

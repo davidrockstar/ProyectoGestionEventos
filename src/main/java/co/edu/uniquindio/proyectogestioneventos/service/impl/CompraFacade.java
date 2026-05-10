@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyectogestioneventos.service.impl;
 
 import co.edu.uniquindio.proyectogestioneventos.model.*;
 import co.edu.uniquindio.proyectogestioneventos.model.decorator.*;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
 import co.edu.uniquindio.proyectogestioneventos.pago.IPago;
 import co.edu.uniquindio.proyectogestioneventos.pago.PayPalAdapter;
 import co.edu.uniquindio.proyectogestioneventos.pago.StripeAdapter;
@@ -72,20 +73,16 @@ public class CompraFacade {
             throw new Exception("Método de pago no soportado");
         }
 
-        // 5. Asignar el método de pago a la compra
-        compraBase.setMetodoPago(motorDePago);
+        // 5. Procesar el pago a través del servicio (esto maneja estados y asientos)
+        compraService.realizarPago(compraBase, motorDePago);
 
-        // 6. Procesar el pago usando el patrón State
-        compraBase.pagar();
+        // 6. Transición final a CONFIRMADA (RF-010)
+        if (compraBase.getEstado() == EstadoCompra.PAGADA) {
+            compraBase.setEstado(EstadoCompra.CONFIRMADA);
+        }
 
-        // 7. Verificar el resultado y finalizar
-        if (compraBase.getEstado() == co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra.PAGADA) {
-            System.out.println("Fachada: Compra completada con éxito!");
-            System.out.println("Descripción final: " + compraDecorada.getDescripcion());
-            System.out.println("Total pagado: $" + compraDecorada.getPrecioTotal());
-        } else {
-            System.out.println("Fachada: El pago fue rechazado.");
-            throw new Exception("El pago falló. El estado de la compra es: " + compraBase.getEstado());
+        if (compraBase.getEstado() != EstadoCompra.CONFIRMADA) {
+            throw new Exception("El pago falló o la compra no pudo ser confirmada.");
         }
 
         return compraDecorada;

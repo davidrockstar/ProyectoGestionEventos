@@ -1,5 +1,9 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
+import javafx.collections.FXCollections;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ObservableList;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +14,22 @@ public class Taquilla implements Serializable {
     private static final long serialVersionUID = 1L;
     private static Taquilla instance;
 
-    private final List<Usuario> usuarios;
-    private final List<Evento> eventos;
-    private final List<Compra> compras;
-    private final List<Recinto> recintos;
-    private final List<Incidencia> incidencias;
-    private final List<ServicioAdicional> servicios; // Nueva lista para servicios adicionales
+    private final ObservableList<Usuario> usuarios;
+    private final ObservableList<Evento> eventos;
+    private final ObservableList<Compra> compras;
+    private final ObservableList<Recinto> recintos;
+    private final ObservableList<Incidencia> incidencias;
+    private final ObservableList<ServicioAdicional> servicios;
+    private final IntegerProperty metricsUpdateCounter; // Para notificar cambios que afectan métricas
 
     private Taquilla() {
-        this.usuarios = new ArrayList<>();
-        this.eventos = new ArrayList<>();
-        this.compras = new ArrayList<>();
-        this.recintos = new ArrayList<>();
-        this.incidencias = new ArrayList<>();
-        this.servicios = new ArrayList<>(); // Inicializar la nueva lista
+        this.usuarios = FXCollections.observableArrayList();
+        this.eventos = FXCollections.observableArrayList();
+        this.compras = FXCollections.observableArrayList();
+        this.recintos = FXCollections.observableArrayList();
+        this.incidencias = FXCollections.observableArrayList();
+        this.servicios = FXCollections.observableArrayList();
+        this.metricsUpdateCounter = new SimpleIntegerProperty(0);
     }
 
     public static Taquilla getInstance() {
@@ -34,28 +40,36 @@ public class Taquilla implements Serializable {
     }
 
     // Getters para todas las listas
-    public List<Usuario> getUsuarios() {
+    public ObservableList<Usuario> getUsuarios() {
         return usuarios;
     }
 
-    public List<Evento> getEventos() {
+    public ObservableList<Evento> getEventos() {
         return eventos;
     }
 
-    public List<Compra> getCompras() {
+    public ObservableList<Compra> getCompras() {
         return compras;
     }
 
-    public List<Recinto> getRecintos() {
+    public ObservableList<Recinto> getRecintos() {
         return recintos;
     }
 
-    public List<Incidencia> getIncidencias() {
+    public ObservableList<Incidencia> getIncidencias() {
         return incidencias;
     }
 
-    public List<ServicioAdicional> getServicios() { // Getter para la nueva lista
+    public ObservableList<ServicioAdicional> getServicios() {
         return servicios;
+    }
+
+    public IntegerProperty metricsUpdateCounterProperty() {
+        return metricsUpdateCounter;
+    }
+
+    public void incrementMetricsUpdateCounter() {
+        metricsUpdateCounter.set(metricsUpdateCounter.get() + 1);
     }
 
     // Métodos de negocio

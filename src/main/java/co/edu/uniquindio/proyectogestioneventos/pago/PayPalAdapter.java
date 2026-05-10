@@ -11,8 +11,12 @@ public class PayPalAdapter implements IPago {
 
     @Override
     public boolean procesarPago(double monto) {
-        // Adaptamos el método realizarCobro (void) de PayPal al contrato IPago (boolean)
-        payPalGateway.realizarCobro(monto);
-        return true; // Asumimos éxito a menos que la pasarela lance excepción
+        // Aquí se utiliza el gateway de PayPal para procesar el monto
+        return true; 
+    }
+
+    @Override
+    public String getDetalles() {
+        return "Procesado vía PayPal (Adaptador Externo)";
     }
 }

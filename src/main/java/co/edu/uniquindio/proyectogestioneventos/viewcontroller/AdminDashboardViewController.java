@@ -61,7 +61,19 @@ public class AdminDashboardViewController {
 
     @FXML
     void onPanelMetricasClick(ActionEvent event) {
-        abrirVentana("PanelMetricasAdminView.fxml", "Panel de Métricas");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/PanelMetricasAdminView.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Panel de Métricas - Administrador");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Error al cargar el panel de métricas. Verifica la ruta y los fx:id.");
+            e.printStackTrace();
+        }
     }
 
     @FXML

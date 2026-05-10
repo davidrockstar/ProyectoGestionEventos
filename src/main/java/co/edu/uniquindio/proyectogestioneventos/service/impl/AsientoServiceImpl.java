@@ -15,25 +15,35 @@ public class AsientoServiceImpl implements IAsientoService {
                 .map(Zona::getListaAsientos)
                 .orElse(new ArrayList<>());
     }
-
+    
     @Override
     public void cambiarEstadoAsiento(String idRecinto, String idZona, String idAsiento, EstadoAsiento nuevoEstado) throws Exception {
         Zona zona = obtenerZona(idRecinto, idZona).orElseThrow(() -> new Exception("Zona no encontrada"));
+        
         Asiento asiento = zona.getListaAsientos().stream()
                 .filter(a -> a.getIdAsiento().equals(idAsiento))
                 .findFirst()
                 .orElseThrow(() -> new Exception("Asiento no encontrado"));
 
-        if (asiento.getEstado() == EstadoAsiento.VENDIDO && nuevoEstado != EstadoAsiento.VENDIDO) {
-            // Opcional: Podrías añadir una advertencia aquí, pero como es admin, permitimos el cambio
+        // Validaciones de transición de estados reales
+        if (nuevoEstado == EstadoAsiento.BLOQUEADO && 
+            (asiento.getEstado() == EstadoAsiento.VENDIDO || asiento.getEstado() == EstadoAsiento.RESERVADO)) {
+            throw new Exception("No se puede bloquear un asiento que ya tiene una transacción (Vendido/Reservado).");
         }
-        
+
+        // Validación de Doble Reserva
+        if (nuevoEstado == EstadoAsiento.RESERVADO && asiento.getEstado() != EstadoAsiento.DISPONIBLE) {
+            throw new Exception("El asiento ya está siendo procesado por otro usuario.");
+        }
+
         asiento.setEstado(nuevoEstado);
+        Taquilla.getInstance().incrementMetricsUpdateCounter(); // Notificar cambio para métricas
     }
 
     @Override
     public void generarDatosPrueba(String idRecinto, String idZona) throws Exception {
         Zona zona = obtenerZona(idRecinto, idZona).orElseThrow(() -> new Exception("Zona no encontrada"));
+
         if (zona.getListaAsientos() == null) {
             zona.setListaAsientos(new ArrayList<>());
         }
@@ -50,8 +60,9 @@ public class AsientoServiceImpl implements IAsientoService {
             String id = idZona + "-" + fila + numero;
             
             EstadoAsiento estado = EstadoAsiento.DISPONIBLE;
-            if (i % 15 == 0) estado = EstadoAsiento.BLOQUEADO;
-            if (i % 20 == 0) estado = EstadoAsiento.VENDIDO;
+            // Simular algunos bloqueados y vendidos
+            if (i % 12 == 0) estado = EstadoAsiento.BLOQUEADO;
+            if (i % 15 == 0) estado = EstadoAsiento.VENDIDO;
 
             zona.getListaAsientos().add(new Asiento(id, fila, numero, estado));
         }

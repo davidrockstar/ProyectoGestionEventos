@@ -3,9 +3,12 @@ package co.edu.uniquindio.proyectogestioneventos.controller;
 import co.edu.uniquindio.proyectogestioneventos.model.*;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoAsiento;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoEntrada;
-import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
-import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
+import co.edu.uniquindio.proyectogestioneventos.service.IAsientoService;
+import co.edu.uniquindio.proyectogestioneventos.service.IZonaService;
+import co.edu.uniquindio.proyectogestioneventos.service.impl.AsientoServiceImpl;
+import co.edu.uniquindio.proyectogestioneventos.service.impl.ZonaServiceImpl;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -30,7 +34,8 @@ import java.util.stream.Collectors;
 
 public class SeleccionEntradasController {
 
-    private final ICompraService compraService = new CompraServiceImpl();
+    private final IAsientoService asientoService = new AsientoServiceImpl();
+    private final IZonaService zonaService = new ZonaServiceImpl();
     private Evento eventoActual;
 
     @FXML
@@ -45,46 +50,101 @@ public class SeleccionEntradasController {
     private Spinner<Integer> spinnerCantidad;
     @FXML
     private TextArea txtMapaAsientos;
+    @FXML
+    private Button btnContinuar;
 
     public void setEvento(Evento evento) {
         this.eventoActual = evento;
         if (evento != null) {
-            lblEvento.setText("Evento: " + evento.getNombre());
-            cbZona.setItems(FXCollections.observableArrayList(evento.getRecinto().getListaZonas()));
+            // Asegurar que los asientos existan en el modelo para calcular disponibilidad real
+            evento.getRecinto().getListaZonas().forEach(z -> {
+                try {
+                    asientoService.generarDatosPrueba(evento.getRecinto().getIdRecinto(), z.getIdZona());
+                } catch (Exception e) {
+                    System.err.println("Error pre-cargando asientos: " + e.getMessage());
+                }
+            });
+            lblEvento.setText(evento.getNombre());
+            cargarZonas();
             actualizarResumenOcupacion();
+        }
+    }
+
+    private void cargarZonas() {
+        if (eventoActual != null && eventoActual.getRecinto() != null) {
+            List<Zona> zonas = zonaService.listarZonas(eventoActual.getRecinto().getIdRecinto());
+            cbZona.setItems(FXCollections.observableArrayList(zonas));
         }
     }
 
     @FXML
     private void initialize() {
         configurarCombos();
+
+        // El botón solo se habilita si hay un asiento seleccionado
+        if (btnContinuar != null) {
+            btnContinuar.disableProperty().bind(cbAsiento.valueProperty().isNull());
+        }
         
         cbZona.setOnAction(e -> {
             Zona seleccionada = cbZona.getValue();
-            if (seleccionada != null && seleccionada.getListaAsientos() != null) {
-                List<Asiento> disponibles = seleccionada.getListaAsientos().stream()
-                        .filter(a -> a.getEstado() == EstadoAsiento.DISPONIBLE)
-                        .collect(Collectors.toList());
-                cbAsiento.setItems(FXCollections.observableArrayList(disponibles));
+            if (seleccionada != null) {
+                cargarAsientos(seleccionada);
             }
         });
 
         // Añadir listener para la tecla ESC al panel raíz
-        rootPane.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ESCAPE) {
-                onCancelarClick(null);
+        if (rootPane != null) {
+            rootPane.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    onCancelarClick(null);
+                }
+            });
+        }
+    }
+
+    private void cargarAsientos(Zona zona) {
+        try {
+            String idRecinto = eventoActual.getRecinto().getIdRecinto();
+            
+            List<Asiento> todosLosAsientos = asientoService.listarAsientos(idRecinto, zona.getIdZona());
+            
+            // Actualizar el resumen de ocupación en la UI
+            actualizarResumenOcupacion();
+
+            // Filtrar solo los disponibles para el usuario
+            List<Asiento> disponibles = todosLosAsientos.stream()
+                    .filter(a -> a.getEstado() == EstadoAsiento.DISPONIBLE)
+                    .collect(Collectors.toList());
+            
+            cbAsiento.setItems(FXCollections.observableArrayList(disponibles));
+            
+            if (disponibles.isEmpty()) {
+                cbAsiento.setPromptText("Sin asientos disponibles");
+            } else {
+                cbAsiento.setPromptText("Seleccione un asiento");
             }
-        });
+        } catch (Exception e) {
+            mostrarAlerta("Error", "No se pudieron cargar los asientos de la zona.");
+        }
     }
 
     private void configurarCombos() {
         cbZona.setConverter(new StringConverter<>() {
-            @Override public String toString(Zona z) { return z == null ? "" : z.getNombre() + " ($" + z.getPrecioBase() + ")"; }
+            @Override public String toString(Zona z) { 
+                if (z == null) return "";
+                long disponibles = z.getListaAsientos().stream()
+                        .filter(a -> a.getEstado() == EstadoAsiento.DISPONIBLE)
+                        .count();
+                return String.format("%s - $%,.0f (Disp: %d/%d)", 
+                    z.getNombre(), z.getPrecioBase(), disponibles, z.getCapacidad()); 
+            }
             @Override public Zona fromString(String string) { return null; }
         });
 
         cbAsiento.setConverter(new StringConverter<>() {
-            @Override public String toString(Asiento a) { return a == null ? "" : "Fila " + a.getFila() + " - N° " + a.getNumero(); }
+            @Override public String toString(Asiento a) { 
+                return a == null ? "" : "[" + a.getIdAsiento() + "] Fila " + a.getFila() + " - Num " + a.getNumero(); }
             @Override public Asiento fromString(String string) { return null; }
         });
     }
@@ -92,41 +152,67 @@ public class SeleccionEntradasController {
     private void actualizarResumenOcupacion() {
         StringBuilder sb = new StringBuilder("--- ESTADO DE OCUPACIÓN ---\n");
         for (Zona z : eventoActual.getRecinto().getListaZonas()) {
+            long disp = z.getListaAsientos().stream()
+                    .filter(a -> a.getEstado() == EstadoAsiento.DISPONIBLE)
+                    .count();
             sb.append(String.format("Zona %s: %.1f%% ocupado (%d asientos)\n", 
-                z.getNombre(), z.calcularOcupacion(), z.getCapacidad()));
+                z.getNombre(), z.calcularOcupacion(), disp, z.getCapacidad()));
         }
         txtMapaAsientos.setText(sb.toString());
     }
 
     @FXML
-    void onAgregarACompraClick(ActionEvent event) {
+    void onContinuarCheckoutClick(ActionEvent event) {
         Zona zona = cbZona.getValue();
         Asiento asiento = cbAsiento.getValue();
 
-        if (zona == null || (zona.getListaAsientos() != null && !zona.getListaAsientos().isEmpty() && asiento == null)) {
-            mostrarAlerta("Error", "Debe seleccionar zona y asiento.");
+        // 1. Validaciones de selección real
+        if (zona == null) {
+            mostrarAlerta("Campo requerido", "Por favor seleccione una zona.");
+            return;
+        }
+        if (asiento == null || asiento.getIdAsiento() == null) {
+            mostrarAlerta("Campo requerido", "Por favor seleccione un asiento específico.");
             return;
         }
 
-        // 1. Crear la entrada (Temporal hasta que se procese la compra)
-        String idEntrada = "EN-" + UUID.randomUUID().toString().substring(0, 5);
-        Entrada nuevaEntrada = new Entrada(idEntrada, zona, asiento, zona.getPrecioBase(), EstadoEntrada.ACTIVA);
-        List<Entrada> entradas = new ArrayList<>();
-        entradas.add(nuevaEntrada);
+        // 2. Validación de estado real (Doble reserva)
+        if (asiento.getEstado() != EstadoAsiento.DISPONIBLE) {
+            mostrarAlerta("Asiento Ocupado", "Este asiento ya no se encuentra disponible. Por favor elija otro.");
+            cargarAsientos(zona);
+            return;
+        }
 
-        // 2. Navegar al Proceso de Compra
+
         try {
-            String basePath = (MyApplication.getUsuarioLogueado() instanceof Administrador) ? "administrador/" : "cliente/";
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "ProcesoCompraView.fxml"));
+            // 1. Efectuar reserva real en el Servicio (DISPONIBLE -> RESERVADO)
+            asientoService.cambiarEstadoAsiento(
+                eventoActual.getRecinto().getIdRecinto(),
+                zona.getIdZona(), 
+                asiento.getIdAsiento(), 
+                EstadoAsiento.RESERVADO
+            );
+
+            // 2. Crear la entrada temporal
+            String idEntrada = "EN-" + UUID.randomUUID().toString().substring(0, 5);
+            Entrada nuevaEntrada = new Entrada(idEntrada, zona, asiento, zona.getPrecioBase(), EstadoEntrada.ACTIVA);
+            List<Entrada> entradas = new ArrayList<>();
+            entradas.add(nuevaEntrada);
+
+            // 3. Navegar DIRECTAMENTE al Checkout como se solicitó en el flujo obligatorio
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/CheckoutView.fxml"));
             Parent root = loader.load();
             
-            ProcesoCompraController controller = loader.getController();
-            controller.setDatosCompra(eventoActual, entradas);
+            CheckoutViewController controller = loader.getController();
+            
+            // Enviamos los datos reales al Checkout
+            List<String> extras = new ArrayList<>();
+            controller.setDatos(eventoActual, entradas, extras, 0.0);
 
             Stage stage = (Stage) rootPane.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Finalizar Compra - " + eventoActual.getNombre());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             mostrarAlerta("Error", "No se pudo cargar la vista de pago.");
         }

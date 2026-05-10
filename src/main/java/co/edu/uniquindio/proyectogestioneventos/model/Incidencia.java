@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyectogestioneventos.model;
 
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoIncidencia;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.TipoIncidencia;
 
 import java.time.LocalDateTime;
@@ -9,14 +10,18 @@ public class Incidencia {
     private TipoIncidencia tipo;
     private String descripcion;
     private LocalDateTime fecha;
-    private Object entidadAfectada; // Puede ser Evento, Compra, Usuario, etc.
+    private Usuario usuario;
+    private Evento evento;
+    private EstadoIncidencia estado;
 
-    public Incidencia(String idIncidencia, TipoIncidencia tipo, String descripcion, LocalDateTime fecha, Object entidadAfectada) {
+    public Incidencia(String idIncidencia, TipoIncidencia tipo, String descripcion, LocalDateTime fecha, Usuario usuario, Evento evento, EstadoIncidencia estado) {
         this.idIncidencia = idIncidencia;
         this.tipo = tipo;
         this.descripcion = descripcion;
         this.fecha = fecha;
-        this.entidadAfectada = entidadAfectada;
+        this.usuario = usuario;
+        this.evento = evento;
+        this.estado = estado;
     }
 
     public String getIdIncidencia() {
@@ -51,11 +56,27 @@ public class Incidencia {
         this.fecha = fecha;
     }
 
-    public Object getEntidadAfectada() {
-        return entidadAfectada;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setEntidadAfectada(Object entidadAfectada) {
-        this.entidadAfectada = entidadAfectada;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Evento getEvento() {
+        return evento;
+    }
+
+    public void setEvento(Evento evento) {
+        this.evento = evento;
+    }
+
+    public EstadoIncidencia getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoIncidencia estado) {
+        this.estado = estado;
     }
 }

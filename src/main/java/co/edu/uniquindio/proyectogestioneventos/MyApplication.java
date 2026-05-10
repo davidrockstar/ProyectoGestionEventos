@@ -49,7 +49,6 @@ public class MyApplication extends Application {
             setUsuarioLogueado(null); // Usar el setter
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("No se pudo cargar la vista de login.");
         }
     }
 
@@ -69,7 +68,6 @@ public class MyApplication extends Application {
             mainStage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("No se pudo cargar la vista: " + fxmlName);
             throw new RuntimeException(e);
         }
     }
@@ -92,7 +90,6 @@ public class MyApplication extends Application {
             mainStage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("No se pudo cargar la vista: " + fxmlName);
             throw new RuntimeException(e);
         }
     }

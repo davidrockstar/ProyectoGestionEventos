@@ -6,12 +6,16 @@ import co.edu.uniquindio.proyectogestioneventos.model.Evento;
 import co.edu.uniquindio.proyectogestioneventos.model.decorator.Comprable;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraFacade;
 import javafx.collections.FXCollections;
+import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -71,39 +75,28 @@ public class ProcesoCompraController {
 
     @FXML
     void onFinalizarCompra(ActionEvent event) {
-        if (evento == null || entradasSeleccionadas == null || entradasSeleccionadas.isEmpty()) {
-            mostrarAlerta("Error", "No hay datos de compra válidos.", Alert.AlertType.ERROR);
-            return;
-        }
-
         try {
-            // 1. Recopilar servicios adicionales (Patrón Decorator)
             List<String> servicios = new ArrayList<>();
             if (chkVIP.isSelected()) servicios.add("VIP");
             if (chkSeguro.isSelected()) servicios.add("SEGURO");
             if (chkMerch.isSelected()) servicios.add("MERCHANDISING");
 
-            // 2. Obtener método de pago seleccionado
-            String tipoPago = comboPago.getValue();
+            double totalExtras = 0;
+            if (chkVIP.isSelected()) totalExtras += 50.0;
+            if (chkSeguro.isSelected()) totalExtras += (precioBase * 0.05);
+            if (chkMerch.isSelected()) totalExtras += 25.0;
 
-            // 3. Ejecutar a través de la Fachada
-            String idUsuario = MyApplication.getUsuarioLogueado().getIdUsuario();
-            
-            Comprable resultado = compraFacade.realizarCompraCompleta(
-                idUsuario, 
-                evento.getIdEvento(), 
-                entradasSeleccionadas, 
-                servicios, 
-                tipoPago
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/CheckoutView.fxml"));
+            Parent root = loader.load();
 
-            mostrarAlerta("Compra Exitosa", "Su pedido ha sido procesado:\n" + resultado.getDescripcion(), Alert.AlertType.INFORMATION);
-            
-            // Cerrar la ventana y volver al panel principal
-            ((Stage) comboPago.getScene().getWindow()).close();
-            
+            CheckoutViewController controller = loader.getController();
+            controller.setDatos(evento, entradasSeleccionadas, servicios, totalExtras);
+
+            Stage stage = (Stage) comboPago.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Checkout - Resumen Final");
         } catch (Exception e) {
-            mostrarAlerta("Error en la Compra", e.getMessage(), Alert.AlertType.ERROR);
+            mostrarAlerta("Error", e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 

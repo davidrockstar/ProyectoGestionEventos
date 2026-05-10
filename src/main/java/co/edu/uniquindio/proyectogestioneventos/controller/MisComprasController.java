@@ -47,12 +47,8 @@ public class MisComprasController {
     private void cargarComprasActivas() {
         if (usuarioActual != null) {
             List<Compra> historial = compraService.obtenerHistorialCompras(usuarioActual, null, null, null);
-            List<Compra> activas = historial.stream()
-                    .filter(c -> c.getEstado() == EstadoCompra.CREADA || 
-                                 c.getEstado() == EstadoCompra.PENDIENTE || 
-                                 c.getEstado() == EstadoCompra.INCIDENCIA)
-                    .collect(Collectors.toList());
-            tablaMisCompras.setItems(FXCollections.observableArrayList(activas));
+            // Mostramos todas las compras relevantes para el usuario en esta vista
+            tablaMisCompras.setItems(FXCollections.observableArrayList(historial));
         }
     }
 
@@ -76,7 +72,6 @@ public class MisComprasController {
     void onModificarCompraClick(ActionEvent event) {
         Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
         if (compraSeleccionada != null) {
-            System.out.println("Modificar compra: " + compraSeleccionada.getIdCompra());
             // Lógica para abrir pantalla de modificación de compra (RF-006)
         }
     }

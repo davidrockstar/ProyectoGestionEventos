@@ -30,7 +30,6 @@ public class ReporteServiceImpl implements IReporteService {
         // La generación de PDF requiere una librería externa como iText o Apache PDFBox.
         // Por simplicidad, simulamos la creación de un archivo vacío.
         File file = File.createTempFile("reporte_compras", ".pdf");
-        System.out.println("Simulando generación de PDF en: " + file.getAbsolutePath());
         // Aquí iría la lógica real con la librería de PDF.
         return file;
     }

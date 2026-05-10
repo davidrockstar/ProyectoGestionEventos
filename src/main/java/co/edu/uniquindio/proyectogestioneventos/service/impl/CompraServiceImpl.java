@@ -57,14 +57,15 @@ public class CompraServiceImpl implements ICompraService {
 
     @Override
     public void cancelarCompra(Compra compra) {
-        // Libera los asientos asociados a la compra si no está pagada
-        if (compra.getEstado() == EstadoCompra.CREADA) {
-            compra.getListaEntradas().forEach(entrada -> {
-                if (entrada.getAsiento() != null) {
-                    entrada.getAsiento().setEstado(EstadoAsiento.DISPONIBLE);
-                }
-            });
-        }
+        // Regla: Cualquier asiento asociado a una compra cancelada vuelve a estar DISPONIBLE
+        // (Cubre transiciones: RESERVADO -> DISPONIBLE y VENDIDO -> DISPONIBLE)
+        compra.getListaEntradas().forEach(entrada -> {
+            if (entrada.getAsiento() != null) {
+                entrada.getAsiento().setEstado(EstadoAsiento.DISPONIBLE);
+                Taquilla.getInstance().incrementMetricsUpdateCounter(); // Notificar cambio para métricas
+            }
+        });
+
         // Delega la lógica de cancelación al estado actual de la compra
         compra.cancelar();
     }
@@ -79,13 +80,16 @@ public class CompraServiceImpl implements ICompraService {
         // Delega la lógica de pago al estado actual
         compra.pagar();
 
-        // Si el pago fue exitoso, marca los asientos como vendidos
-        if (compra.getEstado() == EstadoCompra.PAGADA) {
+        // Sincronización de Estados de Asientos
+        if (compra.getEstado() == EstadoCompra.PAGADA || compra.getEstado() == EstadoCompra.CONFIRMADA) {
             compra.getListaEntradas().forEach(entrada -> {
                 if (entrada.getAsiento() != null) {
                     entrada.getAsiento().setEstado(EstadoAsiento.VENDIDO);
+                    entrada.setEstado(EstadoEntrada.ACTIVA);
                 }
             });
+            // Notificar una sola vez al final del proceso de pago
+            Taquilla.getInstance().incrementMetricsUpdateCounter();
         }
     }
 
@@ -106,13 +110,40 @@ public class CompraServiceImpl implements ICompraService {
         return stream.collect(Collectors.toList());
     }
 
-    // El método original de realizarPago con MetodoPago ya no es compatible con el patrón Strategy.
-    // Se debe usar el método que recibe la interfaz IPago.
-    // Dejo este método comentado para evitar errores de compilación, pero debería ser eliminado.
-    /*
-    @Override
-    public void realizarPago(Compra compra, MetodoPago metodoPago) throws Exception {
-        // ...
+    public List<Compra> listarTodasLasCompras() {
+        return Taquilla.getInstance().getCompras();
     }
-    */
+
+    @Override
+    public void registrarReembolso(Compra compra) throws Exception {
+        if (compra == null || (compra.getEstado() != EstadoCompra.PAGADA && compra.getEstado() != EstadoCompra.CONFIRMADA && compra.getEstado() != EstadoCompra.INCIDENCIA)) {
+            throw new Exception("Solo se pueden reembolsar compras con pago registrado.");
+        }
+
+        compra.reembolsar();
+
+        // Regla: El reembolso libera automáticamente la ocupación
+        compra.getListaEntradas().forEach(entrada -> {
+            if (entrada.getAsiento() != null) {
+                entrada.getAsiento().setEstado(EstadoAsiento.DISPONIBLE);
+                Taquilla.getInstance().incrementMetricsUpdateCounter(); // Notificar cambio para métricas
+            }
+        });
+    }
+
+    @Override
+    public void reasignarAsiento(Compra compra, Entrada entrada, Asiento nuevoAsiento) throws Exception {
+        if (compra == null || entrada == null || nuevoAsiento == null || nuevoAsiento.getEstado() != EstadoAsiento.DISPONIBLE) {
+            throw new Exception("El nuevo asiento seleccionado no está disponible.");
+        }
+
+        if (entrada.getAsiento() != null) {
+            entrada.getAsiento().setEstado(EstadoAsiento.DISPONIBLE);
+        }
+
+        boolean estaPagada = (compra.getEstado() == EstadoCompra.PAGADA || compra.getEstado() == EstadoCompra.CONFIRMADA);
+        nuevoAsiento.setEstado(estaPagada ? EstadoAsiento.VENDIDO : EstadoAsiento.RESERVADO);
+        entrada.setAsiento(nuevoAsiento);
+        Taquilla.getInstance().incrementMetricsUpdateCounter(); // Notificar cambio para métricas
+    }
 }
