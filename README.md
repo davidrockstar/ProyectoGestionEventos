@@ -1,8 +1,8 @@
 Plataforma de Gestión de Eventos y Venta de Entradas
-📝 Descripción del Proyecto
+Descripción del Proyecto
 Este sistema es una solución integral para la exploración de eventos, selección de asientos y compra de entradas, permitiendo además la gestión administrativa y visualización de métricas de rendimiento
 
-🧠 Pensamiento Computacional (RF-043)
+Pensamiento Computacional (RF-043)
 ¿Qué se solicita finalmente? Una plataforma para usuarios (compra de entradas) y administradores (gestión de catálogo y métricas)
 
 ¿Qué información es relevante? Datos de usuarios, eventos, recintos, zonas, asientos, compras e incidencias
@@ -19,7 +19,7 @@ Este sistema es una solución integral para la exploración de eventos, selecci�
 
 ¿Cómo pruebo/escribo la solución en Java? Desarrollo en Java con JavaFX, aplicando SOLID y control de versiones con Git
 
-🏗️ Patrones de Diseño Implementados
+Patrones de Diseño Implementados
 Patrones Creacionales (RF-049)
 Singleton (Obligatorio): Garantiza una instancia única para la persistencia en memoria (clase Taquilla)
 
@@ -41,7 +41,7 @@ State: Gestiona el ciclo de vida de una compra (Creada, Pagada, Cancelada)
 
 Observer: Notifica a los usuarios sobre cambios de estado en sus eventos o compras
 .
-🛠️ Tecnologías Utilizadas
+Tecnologías Utilizadas
 Lenguaje: Java
 Interfaz Gráfica: JavaFX (con JavaFX Charts para métricas)
 .
