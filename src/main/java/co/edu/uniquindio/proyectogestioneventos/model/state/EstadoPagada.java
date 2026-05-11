@@ -6,12 +6,10 @@ import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
 public class EstadoPagada implements IEstadoCompra {
     @Override
     public void pagar(Compra compra) {
-        System.out.println("La compra ya ha sido pagada.");
     }
 
     @Override
     public void cancelar(Compra compra) {
-        System.out.println("No se puede cancelar una compra pagada. Debe solicitar reembolso.");
     }
 
     @Override

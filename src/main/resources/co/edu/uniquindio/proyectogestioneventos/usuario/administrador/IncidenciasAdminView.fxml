@@ -36,11 +36,13 @@
                         </Label>
                         <TableView fx:id="tablaIncidencias" VBox.vgrow="ALWAYS">
                            <columns>
-                              <TableColumn prefWidth="75.0" text="ID Incidencia" />
-                              <TableColumn prefWidth="100.0" text="Tipo" />
-                              <TableColumn prefWidth="200.0" text="Descripción" />
-                              <TableColumn prefWidth="120.0" text="Fecha" />
-                              <TableColumn prefWidth="150.0" text="Entidad Afectada" />
+                              <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
+                              <TableColumn fx:id="colUsuario" prefWidth="100.0" text="Usuario" />
+                              <TableColumn fx:id="colEvento" prefWidth="100.0" text="Evento" />
+                              <TableColumn fx:id="colTipo" prefWidth="100.0" text="Tipo" />
+                              <TableColumn fx:id="colDescripcion" prefWidth="150.0" text="Descripción" />
+                              <TableColumn fx:id="colFecha" prefWidth="120.0" text="Fecha" />
+                              <TableColumn fx:id="colEstado" prefWidth="80.0" text="Estado" />
                            </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -70,14 +72,17 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Label text="Tipo:" />
                               <ComboBox fx:id="cbTipoIncidencia" prefWidth="200.0" GridPane.columnIndex="1" />
-                              <Label text="Descripción:" GridPane.rowIndex="1" />
-                              <TextArea fx:id="txtDescripcionIncidencia" prefHeight="80.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <Label text="Entidad Afectada:" GridPane.rowIndex="2" />
-                              <TextField fx:id="txtEntidadAfectada" promptText="ID Evento/Compra/Usuario" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label text="Usuario:" GridPane.rowIndex="1" />
+                              <ComboBox fx:id="cbUsuario" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label text="Evento:" GridPane.rowIndex="2" />
+                              <ComboBox fx:id="cbEvento" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label text="Descripción:" GridPane.rowIndex="3" />
+                              <TextArea fx:id="txtDescripcionIncidencia" prefHeight="80.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                            </children>
                         </GridPane>
                         <Button mnemonicParsing="false" onAction="#onRegistrarIncidenciaClick" text="Registrar Incidencia" />

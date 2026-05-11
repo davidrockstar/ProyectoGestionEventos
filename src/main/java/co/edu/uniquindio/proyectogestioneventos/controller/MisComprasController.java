@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
+import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
 import co.edu.uniquindio.proyectogestioneventos.model.Compra;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
@@ -8,6 +9,7 @@ import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -47,12 +49,8 @@ public class MisComprasController {
     private void cargarComprasActivas() {
         if (usuarioActual != null) {
             List<Compra> historial = compraService.obtenerHistorialCompras(usuarioActual, null, null, null);
-            List<Compra> activas = historial.stream()
-                    .filter(c -> c.getEstado() == EstadoCompra.CREADA || 
-                                 c.getEstado() == EstadoCompra.PENDIENTE || 
-                                 c.getEstado() == EstadoCompra.INCIDENCIA)
-                    .collect(Collectors.toList());
-            tablaMisCompras.setItems(FXCollections.observableArrayList(activas));
+            // Mostramos todas las compras relevantes para el usuario en esta vista
+            tablaMisCompras.setItems(FXCollections.observableArrayList(historial));
         }
     }
 
@@ -63,6 +61,11 @@ public class MisComprasController {
         colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
         colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+
+        // Listener para actualizar la tabla si se agrega una nueva compra a la Taquilla
+        Taquilla.getInstance().getCompras().addListener((ListChangeListener<Compra>) c -> {
+            cargarComprasActivas();
+        });
 
         // Añadir listener para la tecla ESC al panel raíz
         rootPane.setOnKeyPressed(event -> {
@@ -76,7 +79,6 @@ public class MisComprasController {
     void onModificarCompraClick(ActionEvent event) {
         Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
         if (compraSeleccionada != null) {
-            System.out.println("Modificar compra: " + compraSeleccionada.getIdCompra());
             // Lógica para abrir pantalla de modificación de compra (RF-006)
         }
     }

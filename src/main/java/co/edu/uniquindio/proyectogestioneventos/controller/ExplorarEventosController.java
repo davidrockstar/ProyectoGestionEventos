@@ -6,30 +6,34 @@ import co.edu.uniquindio.proyectogestioneventos.model.Evento;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.service.IEventoService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.EventoServiceImpl;
+import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
+import javafx.collections.ListChangeListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoEvento;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ExplorarEventosController {
 
     private final IEventoService eventoService = new EventoServiceImpl();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
     private AnchorPane rootPane;
@@ -42,7 +46,7 @@ public class ExplorarEventosController {
     @FXML
     private TableColumn<Evento, String> colCiudad;
     @FXML
-    private TableColumn<Evento, LocalDateTime> colFecha;
+    private TableColumn<Evento, String> colFecha;
     @FXML
     private TableColumn<Evento, String> colRecinto;
     @FXML
@@ -61,18 +65,25 @@ public class ExplorarEventosController {
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colCategoria.setCellValueFactory(new PropertyValueFactory<>("categoria"));
         colCiudad.setCellValueFactory(new PropertyValueFactory<>("ciudad"));
-        colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaHora"));
         
+        colFecha.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getFechaHora().format(formatter)));
+
         // Vinculaciones personalizadas para objetos anidados o Enums
         colRecinto.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getRecinto() != null ? cellData.getValue().getRecinto().getNombre() : "N/A"));
         
         if (colEstado != null) {
             colEstado.setCellValueFactory(cellData -> 
-                new SimpleStringProperty(cellData.getValue().getEstado() != null ? cellData.getValue().getEstado().toString() : "N/A"));
+                new SimpleStringProperty(cellData.getValue().getEstado().toString()));
         }
 
-        cargarEventos(eventoService.listarEventosDisponibles());
+        cargarEventosPublicados(); // Carga inicial de eventos PUBLICADOS y válidos
+
+        // Listener para actualizar la tabla si el administrador agrega un evento en tiempo real
+        Taquilla.getInstance().getEventos().addListener((ListChangeListener<Evento>) c -> {
+            cargarEventosPublicados();
+        });
 
         rootPane.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
@@ -82,60 +93,110 @@ public class ExplorarEventosController {
     }
 
     @FXML
+    private void cargarEventosPublicados() {
+        // Obtiene todos los eventos y filtra para mostrar solo los PUBLICADOS, con recinto y fecha válidos
+        List<Evento> todosLosEventos = eventoService.listarTodosEventos();
+        List<Evento> eventosFiltrados = todosLosEventos.stream()
+                .filter(e -> e.getEstado() == EstadoEvento.PUBLICADO)
+                .filter(e -> e.getRecinto() != null)
+                .filter(e -> e.getFechaHora() != null && e.getFechaHora().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
+        cargarEventos(eventosFiltrados);
+    }
+
+    @FXML
     private void onFiltrarClick() {
         LocalDate fecha = campoFecha.getValue();
         String ciudad = campoCiudad.getText();
         String categoria = campoCategoria.getText();
-        Double precioMax = null;
+        Double precioMaxAux = null;
         if (campoPrecioMax.getText() != null && !campoPrecioMax.getText().isEmpty()) {
             try {
-                precioMax = Double.parseDouble(campoPrecioMax.getText());
+                precioMaxAux = Double.parseDouble(campoPrecioMax.getText());
             } catch (NumberFormatException e) {
-                // Ignorar si no es un número
+                mostrarAlerta("Error", "El precio máximo debe ser un valor numérico.", Alert.AlertType.WARNING);
             }
         }
-        List<Evento> eventosFiltrados = eventoService.filtrarEventos(fecha, ciudad, categoria, precioMax);
-        cargarEventos(eventosFiltrados);
+        final Double precioMax = precioMaxAux;
+        
+        // Iniciar el filtrado con la lista base de eventos PUBLICADOS y válidos
+        List<Evento> baseEventos = eventoService.listarTodosEventos().stream()
+                .filter(e -> e.getEstado() == EstadoEvento.PUBLICADO)
+                .filter(e -> e.getRecinto() != null)
+                .filter(e -> e.getFechaHora() != null && e.getFechaHora().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
+
+        List<Evento> eventosFiltrados = baseEventos.stream()
+                .filter(e -> fecha == null || (e.getFechaHora() != null && e.getFechaHora().toLocalDate().equals(fecha)))
+                .filter(e -> ciudad == null || ciudad.isEmpty() || (e.getCiudad() != null && e.getCiudad().equalsIgnoreCase(ciudad)))
+                .filter(e -> categoria == null || categoria.isEmpty() || (e.getCategoria() != null && e.getCategoria().equalsIgnoreCase(categoria)))
+                .filter(e -> precioMax == null || e.getRecinto().getListaZonas().stream().anyMatch(z -> z.getPrecioBase() <= precioMax))
+                .collect(Collectors.toList());
+        cargarEventos(eventosFiltrados); // Cargar la lista filtrada en la tabla
+    }
+
+    @FXML
+    void onTablaMouseClicked(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            onVerDetalleClick(null);
+        }
     }
 
     @FXML
     private void onVerDetalleClick(ActionEvent event) {
         Evento eventoSeleccionado = tablaEventos.getSelectionModel().getSelectedItem();
-        if (eventoSeleccionado != null) {
-            try {
-                Usuario usuarioLogueado = MyApplication.getUsuarioLogueado();
-                // Si por alguna razón no hay usuario (sesión expirada), asumimos cliente o redirigimos
-                String basePath = (usuarioLogueado instanceof Administrador) ? "administrador/" : "cliente/";
-                
-                String resourcePath = "/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "DetalleEventoView.fxml";
-                java.net.URL resource = getClass().getResource(resourcePath);
-                
-                if (resource == null) {
-                    throw new IOException("No se pudo encontrar el archivo FXML en: " + resourcePath);
-                }
+        if (eventoSeleccionado == null) {
+            mostrarAlerta("Advertencia", "Por favor seleccione un evento de la tabla.", Alert.AlertType.WARNING);
+            return;
+        }
 
-                FXMLLoader loader = new FXMLLoader(resource);
-                
-                Parent root = loader.load();
-                
-                // Obtener el controlador de la vista de detalle y pasar el modelo
-                Object controller = loader.getController();
-                if (controller instanceof DetalleEventoController) {
-                    ((DetalleEventoController) controller).setEvento(eventoSeleccionado);
-                }
+        try {
+            // La vista DetalleEventoView.fxml está en la carpeta de administrador, asumiendo que es compartida.
+            String resourcePath = "/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/DetalleEventoView.fxml";
+            
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(resourcePath));
+            Parent root = loader.load();
+            
+            DetalleEventoController controller = loader.getController();
+            controller.setEvento(eventoSeleccionado);
 
-                Stage stage = new Stage();
-                stage.setTitle("Detalle del Evento - " + eventoSeleccionado.getNombre());
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.APPLICATION_MODAL);
-                
-                // Obtener el stage actual para centrar la ventana emergente
-                Stage currentStage = (Stage) rootPane.getScene().getWindow();
-                stage.initOwner(currentStage);
-                stage.showAndWait();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Detalle del Evento - " + eventoSeleccionado.getNombre());
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo cargar la vista de detalle del evento.", Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    void onComprarEntradasClick(ActionEvent event) {
+        Evento seleccionado = tablaEventos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Selección Requerida", "Por favor seleccione un evento para iniciar la compra.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            // Determinar carpeta según el rol para cargar la vista correcta
+            Usuario user = MyApplication.getUsuarioLogueado();
+            String folder = (user instanceof Administrador) ? "administrador" : "cliente";
+            
+            // Navegación directa a la selección de entradas
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + folder + "/SeleccionEntradasView.fxml"));
+            Parent root = loader.load();
+            
+            SeleccionEntradasController controller = loader.getController();
+            controller.setEvento(seleccionado);
+
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Compra de Entradas - " + seleccionado.getNombre());
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo cargar el módulo de selección de entradas.", Alert.AlertType.ERROR);
         }
     }
 
@@ -146,6 +207,14 @@ public class ExplorarEventosController {
     }
 
 
+
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
 
     private void cargarEventos(List<Evento> eventos) {
         tablaEventos.getItems().setAll(eventos);

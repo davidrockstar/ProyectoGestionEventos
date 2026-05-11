@@ -16,7 +16,7 @@
             <Font size="20.0" />
          </font>
       </Label>
-      <TableView fx:id="tablaEventos" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="150.0">
+      <TableView fx:id="tablaEventos" onMouseClicked="#onTablaMouseClicked" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="150.0">
         <columns>
           <TableColumn fx:id="colNombre" prefWidth="150.0" text="Nombre" />
           <TableColumn fx:id="colCategoria" prefWidth="100.0" text="Categoría" />
@@ -35,7 +35,8 @@
       <TextField fx:id="campoCategoria" promptText="Categoría" AnchorPane.leftAnchor="370.0" AnchorPane.topAnchor="95.0" />
       <TextField fx:id="campoPrecioMax" promptText="Precio Máx." AnchorPane.leftAnchor="540.0" AnchorPane.topAnchor="95.0" />
       <Button onAction="#onFiltrarClick" text="Filtrar" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="95.0" />
-      <Button onAction="#onVerDetalleClick" text="Ver Detalle" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" />
+      <Button onAction="#onVerDetalleClick" prefHeight="30.0" prefWidth="120.0" text="Ver Detalle" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" />
+      <Button onAction="#onComprarEntradasClick" prefHeight="35.0" prefWidth="160.0" style="-fx-background-color: #2c3e50; -fx-text-fill: white; -fx-font-weight: bold;" text="COMPRAR ENTRADAS" AnchorPane.bottomAnchor="28.0" AnchorPane.leftAnchor="170.0" />
       <Button onAction="#onVolverClick" text="Volver al Panel" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="30.0" />
    </children>
 </AnchorPane>

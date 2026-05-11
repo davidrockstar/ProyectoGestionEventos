@@ -13,4 +13,9 @@ public class StripeAdapter implements IPago {
     public boolean procesarPago(double monto) {
         return stripeGateway.charge(monto);
     }
+
+    @Override
+    public String getDetalles() {
+        return "Procesado vía Stripe (Adaptador Externo)";
+    }
 }

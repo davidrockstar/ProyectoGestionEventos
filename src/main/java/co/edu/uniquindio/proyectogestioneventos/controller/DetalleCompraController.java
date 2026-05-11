@@ -29,6 +29,8 @@ public class DetalleCompraController {
     @FXML
     private Text lblIdCompra;
     @FXML
+    private Label lblUsuario;
+    @FXML
     private Label lblEvento;
     @FXML
     private Label lblFechaCreacion;
@@ -59,6 +61,11 @@ public class DetalleCompraController {
 
     private void actualizarDetalles() {
         lblIdCompra.setText("Detalle de Compra: " + compraActual.getIdCompra());
+        
+        if (lblUsuario != null && compraActual.getUsuario() != null) {
+            lblUsuario.setText(compraActual.getUsuario().getNombre() + " (" + compraActual.getUsuario().getEmail() + ")");
+        }
+        
         lblEvento.setText(compraActual.getEvento().getNombre());
         lblFechaCreacion.setText(compraActual.getFechaCreacion().toLocalDate().toString());
         lblEstado.setText(compraActual.getEstado().toString());

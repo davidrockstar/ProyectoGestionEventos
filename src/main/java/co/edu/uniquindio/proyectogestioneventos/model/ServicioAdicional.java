@@ -3,11 +3,13 @@ package co.edu.uniquindio.proyectogestioneventos.model;
 public class ServicioAdicional {
     private String id;
     private String nombre;
+    private String descripcion;
     private double precio;
 
-    public ServicioAdicional(String id, String nombre, double precio) {
+    public ServicioAdicional(String id, String nombre, String descripcion, double precio) {
         this.id = id;
         this.nombre = nombre;
+        this.descripcion = descripcion;
         this.precio = precio;
     }
 
@@ -25,6 +27,14 @@ public class ServicioAdicional {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public double getPrecio() {

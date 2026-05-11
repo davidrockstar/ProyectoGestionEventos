@@ -12,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -62,7 +63,18 @@ public class GestionAsientosViewController {
     void onRecintoSeleccionado() {
         Recinto r = cbRecinto.getValue();
         if (r != null) {
+            // Limpiar la selección de zona y la tabla de asientos antes de cargar nuevas opciones
+            cbZona.getSelectionModel().clearSelection();
+            tablaAsientos.getItems().clear();
+
             cbZona.setItems(FXCollections.observableArrayList(r.getListaZonas()));
+            if (!cbZona.getItems().isEmpty()) {
+                cbZona.getSelectionModel().selectFirst(); // Seleccionar la primera zona para cargar sus asientos
+                // Llamar explícitamente a actualizarTabla() para asegurar el refresco
+                actualizarTabla();
+            }
+        } else {
+            cbZona.getItems().clear();
             tablaAsientos.getItems().clear();
         }
     }
@@ -91,17 +103,61 @@ public class GestionAsientosViewController {
 
     @FXML
     void onHabilitarAsientoClick(ActionEvent event) {
-        procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Habilitar Asiento");
+        Asiento seleccionado = tablaAsientos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Advertencia", "Habilitar Asiento", "Por favor, seleccione un asiento de la tabla.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        // Habilitar se usa principalmente para reactivar asientos BLOQUEADOS
+        if (seleccionado.getEstado() == EstadoAsiento.BLOQUEADO) {
+            procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Habilitar Asiento");
+        } else {
+            mostrarAlerta("Información", "El asiento ya se encuentra habilitado o tiene una reserva/venta activa.", Alert.AlertType.INFORMATION);
+        }
     }
 
     @FXML
     void onBloquearAsientoClick(ActionEvent event) {
+        Asiento seleccionado = tablaAsientos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Advertencia", "Bloquear Asiento", "Seleccione un asiento.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        // Validación: Solo se pueden bloquear asientos que no tengan compromisos comerciales
+        if (seleccionado.getEstado() == EstadoAsiento.VENDIDO || seleccionado.getEstado() == EstadoAsiento.RESERVADO) {
+            mostrarAlerta("Error", "Acción no permitida", "No se puede bloquear un asiento con estado: " + seleccionado.getEstado(), Alert.AlertType.ERROR);
+            return;
+        }
+
         procesarCambioEstado(EstadoAsiento.BLOQUEADO, "Bloquear Asiento");
     }
 
     @FXML
     void onLiberarAsientoClick(ActionEvent event) {
-        procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Liberar Asiento");
+        Asiento seleccionado = tablaAsientos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Advertencia", "Liberar Asiento", "Seleccione un asiento para liberar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        if (seleccionado.getEstado() == EstadoAsiento.VENDIDO) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
+                "¿Desea liberar un asiento que ya ha sido VENDIDO? Esta acción no reembolsa el dinero automáticamente.", 
+                ButtonType.YES, ButtonType.NO);
+            confirm.setTitle("Confirmar Liberación");
+            confirm.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Liberar Asiento");
+                }
+            });
+        } else if (seleccionado.getEstado() == EstadoAsiento.BLOQUEADO || seleccionado.getEstado() == EstadoAsiento.RESERVADO) {
+            // Los bloqueos y reservas se liberan directamente a DISPONIBLE
+            procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Liberar Asiento");
+        } else {
+            mostrarAlerta("Información", "El asiento ya está disponible.", Alert.AlertType.INFORMATION);
+        }
     }
 
     private void procesarCambioEstado(EstadoAsiento nuevoEstado, String titulo) {

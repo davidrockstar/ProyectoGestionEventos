@@ -117,6 +117,5 @@ public class Usuario implements IObservador {
     @Override
     public void actualizar(String mensaje) {
         this.notificaciones.add(mensaje);
-        System.out.println("Notificación para " + this.nombre + ": " + mensaje);
     }
 }
