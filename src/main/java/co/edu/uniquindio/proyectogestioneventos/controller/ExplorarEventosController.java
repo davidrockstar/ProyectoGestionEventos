@@ -179,8 +179,12 @@ public class ExplorarEventosController {
         }
 
         try {
+            // Determinar carpeta según el rol para cargar la vista correcta
+            Usuario user = MyApplication.getUsuarioLogueado();
+            String folder = (user instanceof Administrador) ? "administrador" : "cliente";
+            
             // Navegación directa a la selección de entradas
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/SeleccionEntradasView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + folder + "/SeleccionEntradasView.fxml"));
             Parent root = loader.load();
             
             SeleccionEntradasController controller = loader.getController();

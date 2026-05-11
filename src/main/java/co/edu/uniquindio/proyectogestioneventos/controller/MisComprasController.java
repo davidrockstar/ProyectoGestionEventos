@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
+import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
 import co.edu.uniquindio.proyectogestioneventos.model.Compra;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
@@ -8,6 +9,7 @@ import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
 import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -59,6 +61,11 @@ public class MisComprasController {
         colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
         colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+
+        // Listener para actualizar la tabla si se agrega una nueva compra a la Taquilla
+        Taquilla.getInstance().getCompras().addListener((ListChangeListener<Compra>) c -> {
+            cargarComprasActivas();
+        });
 
         // Añadir listener para la tecla ESC al panel raíz
         rootPane.setOnKeyPressed(event -> {

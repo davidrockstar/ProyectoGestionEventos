@@ -128,8 +128,16 @@ public class CheckoutViewController {
     private void navegarAMisCompras() {
         try {
             // Usamos la ruta definida en el contexto para MisCompras
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/MisComprasView.fxml"));
+            // Determinar la carpeta según el rol del usuario logueado
+            Usuario user = MyApplication.getUsuarioLogueado();
+            String folder = (user instanceof Administrador) ? "administrador" : "cliente";
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + folder + "/MisComprasView.fxml"));
             Parent root = loader.load();
+            
+            // Obtener el controlador de la vista de destino y pasar el usuario actual
+            MisComprasController controller = loader.getController();
+            controller.setUsuario(MyApplication.getUsuarioLogueado());
             
             Stage stage = (Stage) lblNombreEvento.getScene().getWindow();
             stage.setScene(new Scene(root));

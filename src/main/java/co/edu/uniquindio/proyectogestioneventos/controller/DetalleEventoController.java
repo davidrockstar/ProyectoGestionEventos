@@ -2,9 +2,12 @@ package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
 import co.edu.uniquindio.proyectogestioneventos.model.Administrador;
+import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.model.Evento;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.model.Zona;
+import co.edu.uniquindio.proyectogestioneventos.service.IEventoService;
+import co.edu.uniquindio.proyectogestioneventos.service.impl.EventoServiceImpl;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,16 +19,16 @@ import javafx.event.ActionEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
 public class DetalleEventoController {
 
     @FXML private Text lblNombreEvento;
-    @FXML private Label lblCiudad, lblFechaHora, lblRecinto, lblAforo, lblCategoria;
+    @FXML private Label lblCiudad, lblFechaHora, lblRecinto, lblAforo, lblCategoria, lblEstado;
     @FXML private TextArea txtDescripcion, txtZonasPrecios, txtReglas;
     
+    private final IEventoService eventoService = new EventoServiceImpl();
     private Evento evento;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -34,51 +37,71 @@ public class DetalleEventoController {
             mostrarAlerta("Error", "El evento seleccionado es inválido.", Alert.AlertType.ERROR);
             return;
         }
-        this.evento = evento;
-        cargarDatos();
+        
+        try {
+            // Obtener datos actualizados del servicio para asegurar que el Recinto y Zonas estén cargados
+            this.evento = eventoService.obtenerDetalleEvento(evento.getIdEvento())
+                    .orElse(evento);
+            
+            cargarDatos();
+        } catch (Exception e) {
+            mostrarAlerta("Error", "Error cargando evento: no se pudo recuperar la información.", Alert.AlertType.ERROR);
+        }
     }
 
     private void cargarDatos() {
-        if (evento.getRecinto() == null) {
-            mostrarAlerta("Error", "Este evento no tiene un recinto configurado.", Alert.AlertType.ERROR);
-            return;
-        }
+        if (evento == null) return;
 
         lblNombreEvento.setText(evento.getNombre());
-        lblCiudad.setText(evento.getCiudad());
-        lblFechaHora.setText(evento.getFechaHora().format(formatter));
-        lblRecinto.setText(evento.getRecinto().getNombre());
-        lblCategoria.setText(evento.getCategoria());
-        txtDescripcion.setText(evento.getDescripcion());
+        lblCiudad.setText(evento.getCiudad() != null ? evento.getCiudad() : "N/A");
+        lblFechaHora.setText(evento.getFechaHora() != null ? evento.getFechaHora().format(formatter) : "N/A");
+        lblCategoria.setText(evento.getCategoria() != null ? evento.getCategoria() : "N/A");
+        lblEstado.setText(evento.getEstado() != null ? evento.getEstado().toString() : "N/A");
+        txtDescripcion.setText(evento.getDescripcion() != null ? evento.getDescripcion() : "Sin descripción disponible.");
         
-        int aforoTotal = evento.getRecinto().getListaZonas().stream().mapToInt(Zona::getCapacidad).sum();
-        lblAforo.setText(String.valueOf(aforoTotal));
+        if (evento.getRecinto() != null) {
+            lblRecinto.setText(evento.getRecinto().getNombre());
+            
+            int aforoTotal = evento.getRecinto().getListaZonas().stream()
+                    .filter(z -> z != null)
+                    .mapToInt(Zona::getCapacidad)
+                    .sum();
+            lblAforo.setText(String.valueOf(aforoTotal));
 
-        if (evento.getRecinto().getListaZonas().isEmpty()) {
-            txtZonasPrecios.setText("No hay zonas disponibles para este recinto.");
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (Zona zona : evento.getRecinto().getListaZonas()) {
-                double ocupacion = zona.calcularOcupacion();
-                sb.append(String.format("- %s:\n  Precio Base: $%,.2f | Capacidad: %d | Ocupación: %.1f%%\n\n", 
-                    zona.getNombre(), zona.getPrecioBase(), zona.getCapacidad(), ocupacion));
+            if (evento.getRecinto().getListaZonas().isEmpty()) {
+                txtZonasPrecios.setText("No hay zonas disponibles configuradas.");
+            } else {
+                StringBuilder sb = new StringBuilder();
+                for (Zona zona : evento.getRecinto().getListaZonas()) {
+                    if (zona != null) {
+                        sb.append(String.format("• %s\n  Precio: $%,.2f | Capacidad: %d | Ocupación: %.1f%%\n\n", 
+                            zona.getNombre(), zona.getPrecioBase(), zona.getCapacidad(), zona.calcularOcupacion()));
+                    }
+                }
+                txtZonasPrecios.setText(sb.toString());
             }
-            txtZonasPrecios.setText(sb.toString());
+        } else {
+            lblRecinto.setText("No asignado");
+            lblAforo.setText("0");
+            txtZonasPrecios.setText("Información de zonas no disponible.");
         }
 
-        txtReglas.setText("1. Prohibido el ingreso de alimentos y bebidas.\n2. Llegar 30 min antes del inicio.\n3. Presentar entrada digital o impresa.");
+        txtReglas.setText("1. Prohibido el ingreso de alimentos.\n2. Presentar documento de identidad.\n3. Prohibido fumar en el recinto.");
     }
 
     @FXML
     void onSeleccionarEntradasClick(ActionEvent event) {
-        if (evento == null || evento.getRecinto() == null || evento.getRecinto().getListaZonas().isEmpty()) {
-            mostrarAlerta("Acción no permitida", "No se pueden seleccionar entradas para este evento en este momento.", Alert.AlertType.WARNING);
+        if (evento == null || evento.getRecinto() == null) {
+            mostrarAlerta("Acción no permitida", "Este evento no permite selección de entradas actualmente.", Alert.AlertType.WARNING);
             return;
         }
 
         try {
-            // La vista SeleccionEntradasView.fxml está en la carpeta de administrador, asumiendo que es compartida.
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/SeleccionEntradasView.fxml"));
+            // Determinar carpeta según el rol para el flujo de compra
+            Usuario user = MyApplication.getUsuarioLogueado();
+            String folder = (user instanceof Administrador) ? "administrador" : "cliente";
+            
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + folder + "/SeleccionEntradasView.fxml"));
             Parent root = loader.load();
             
             SeleccionEntradasController controller = loader.getController();
@@ -96,19 +119,16 @@ public class DetalleEventoController {
     @FXML
     void onVolverClick(ActionEvent event) {
         try {
-            // Navegar de vuelta a ExplorarEventosView.fxml
-            // Asumiendo que ExplorarEventosView.fxml también está en la carpeta de administrador
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/administrador/explorarEventosView.fxml"));
+            // Retornar a la vista de exploración según el rol (SesionUsuario)
+            Usuario user = MyApplication.getUsuarioLogueado();
+            String folder = (user instanceof Administrador) ? "administrador" : "cliente";
+            
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + folder + "/explorarEventosView.fxml"));
             Parent root = loader.load();
 
-            // Obtener el Stage actual y cambiar la escena
             Stage stage = (Stage) lblNombreEvento.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Explorar Eventos");
-
-            // Opcional: Si ExplorarEventosController necesita inicialización específica al volver
-            // ExplorarEventosController controller = loader.getController();
-            // controller.cargarEventosPublicados(); // Por ejemplo, para refrescar la tabla
         } catch (IOException e) {
             e.printStackTrace();
             mostrarAlerta("Error", "No se pudo cargar la vista de exploración de eventos.", Alert.AlertType.ERROR);

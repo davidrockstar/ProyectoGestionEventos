@@ -10,6 +10,9 @@ import co.edu.uniquindio.proyectogestioneventos.service.impl.AsientoServiceImpl;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.ZonaServiceImpl;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -52,34 +55,51 @@ public class SeleccionEntradasController {
     private TextArea txtMapaAsientos;
     @FXML
     private Button btnContinuar;
+    @FXML
+    private TableView<Asiento> tablaAsientos;
+    @FXML
+    private TableColumn<Asiento, String> colCodigo, colFila, colNumero, colEstado;
 
     public void setEvento(Evento evento) {
-        this.eventoActual = evento;
-        if (evento != null) {
-            // Asegurar que los asientos existan en el modelo para calcular disponibilidad real
-            evento.getRecinto().getListaZonas().forEach(z -> {
-                try {
-                    asientoService.generarDatosPrueba(evento.getRecinto().getIdRecinto(), z.getIdZona());
-                } catch (Exception e) {
-                    System.err.println("Error pre-cargando asientos: " + e.getMessage());
-                }
-            });
-            lblEvento.setText(evento.getNombre());
-            cargarZonas();
-            actualizarResumenOcupacion();
+        if (evento == null) {
+            mostrarAlerta("Error de Carga", "El evento seleccionado no es válido.", Alert.AlertType.ERROR);
+            return;
         }
+
+        this.eventoActual = evento;
+        lblEvento.setText(eventoActual.getNombre());
+        cargarZonas();
+        actualizarResumenOcupacion();
     }
 
     private void cargarZonas() {
+        cbZona.getItems().clear();
         if (eventoActual != null && eventoActual.getRecinto() != null) {
-            List<Zona> zonas = zonaService.listarZonas(eventoActual.getRecinto().getIdRecinto());
-            cbZona.setItems(FXCollections.observableArrayList(zonas));
+            List<Zona> listaZonas = eventoActual.getRecinto().getListaZonas();
+            if (listaZonas != null && !listaZonas.isEmpty()) {
+                cbZona.setItems(FXCollections.observableArrayList(listaZonas));
+            }
         }
     }
 
     @FXML
     private void initialize() {
         configurarCombos();
+        
+        // Configuración de columnas de la tabla de asientos
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("idAsiento"));
+        colFila.setCellValueFactory(new PropertyValueFactory<>("fila"));
+        colNumero.setCellValueFactory(new PropertyValueFactory<>("numero"));
+        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+
+        // Listener para cargar asientos cuando cambia la zona seleccionada
+        cbZona.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                cargarAsientos(newVal);
+            } else {
+                tablaAsientos.getItems().clear();
+            }
+        });
 
         // El botón solo se habilita si hay un asiento seleccionado
         if (btnContinuar != null) {
@@ -104,29 +124,20 @@ public class SeleccionEntradasController {
     }
 
     private void cargarAsientos(Zona zona) {
-        try {
-            String idRecinto = eventoActual.getRecinto().getIdRecinto();
-            
-            List<Asiento> todosLosAsientos = asientoService.listarAsientos(idRecinto, zona.getIdZona());
-            
-            // Actualizar el resumen de ocupación en la UI
-            actualizarResumenOcupacion();
+        // Limpiar tabla y validar nulos
+        tablaAsientos.getItems().clear();
+        if (zona == null || zona.getListaAsientos() == null) return;
 
-            // Filtrar solo los disponibles para el usuario
-            List<Asiento> disponibles = todosLosAsientos.stream()
-                    .filter(a -> a.getEstado() == EstadoAsiento.DISPONIBLE)
-                    .collect(Collectors.toList());
-            
-            cbAsiento.setItems(FXCollections.observableArrayList(disponibles));
-            
-            if (disponibles.isEmpty()) {
-                cbAsiento.setPromptText("Sin asientos disponibles");
-            } else {
-                cbAsiento.setPromptText("Seleccione un asiento");
-            }
-        } catch (Exception e) {
-            mostrarAlerta("Error", "No se pudieron cargar los asientos de la zona.");
-        }
+        // Filtrar exclusivamente los asientos con estado DISPONIBLE
+        List<Asiento> disponibles = zona.getListaAsientos().stream()
+                .filter(a -> a != null && a.getEstado() == EstadoAsiento.DISPONIBLE)
+                .collect(Collectors.toList());
+
+        // Cargar los datos filtrados en la tabla
+        tablaAsientos.setItems(FXCollections.observableArrayList(disponibles));
+        
+        // Sincronizar también el ComboBox de asientos si sigue en uso
+        cbAsiento.setItems(FXCollections.observableArrayList(disponibles));
     }
 
     private void configurarCombos() {
@@ -163,29 +174,30 @@ public class SeleccionEntradasController {
 
     @FXML
     void onContinuarCheckoutClick(ActionEvent event) {
+        // 1. Validar selección completa (Evento, Zona, Asiento)
+        if (eventoActual == null) {
+            mostrarAlerta("Error", "No se ha cargado la información del evento.", Alert.AlertType.ERROR);
+            return;
+        }
+
         Zona zona = cbZona.getValue();
         Asiento asiento = cbAsiento.getValue();
 
-        // 1. Validaciones de selección real
         if (zona == null) {
-            mostrarAlerta("Campo requerido", "Por favor seleccione una zona.");
+            mostrarAlerta("Selección Incompleta", "Por favor seleccione una zona.", Alert.AlertType.WARNING);
             return;
         }
         if (asiento == null || asiento.getIdAsiento() == null) {
-            mostrarAlerta("Campo requerido", "Por favor seleccione un asiento específico.");
+            mostrarAlerta("Selección Incompleta", "Por favor seleccione un asiento específico.", Alert.AlertType.WARNING);
             return;
         }
-
-        // 2. Validación de estado real (Doble reserva)
-        if (asiento.getEstado() != EstadoAsiento.DISPONIBLE) {
-            mostrarAlerta("Asiento Ocupado", "Este asiento ya no se encuentra disponible. Por favor elija otro.");
-            cargarAsientos(zona);
-            return;
-        }
-
 
         try {
-            // 1. Efectuar reserva real en el Servicio (DISPONIBLE -> RESERVADO)
+            // 2. Cambiar Estado: DISPONIBLE -> RESERVADO (Seguridad contra doble venta)
+            if (asiento.getEstado() != EstadoAsiento.DISPONIBLE) {
+                throw new Exception("El asiento ya no está disponible.");
+            }
+
             asientoService.cambiarEstadoAsiento(
                 eventoActual.getRecinto().getIdRecinto(),
                 zona.getIdZona(), 
@@ -193,28 +205,25 @@ public class SeleccionEntradasController {
                 EstadoAsiento.RESERVADO
             );
 
-            // 2. Crear la entrada temporal
+            // 3. Generar entrada temporal
             String idEntrada = "EN-" + UUID.randomUUID().toString().substring(0, 5);
             Entrada nuevaEntrada = new Entrada(idEntrada, zona, asiento, zona.getPrecioBase(), EstadoEntrada.ACTIVA);
             List<Entrada> entradas = new ArrayList<>();
             entradas.add(nuevaEntrada);
 
-            // 3. Navegar DIRECTAMENTE al Checkout como se solicitó en el flujo obligatorio
+            // 4. Abrir CheckoutView enviando datos reales
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/CheckoutView.fxml"));
             Parent root = loader.load();
             
             CheckoutViewController controller = loader.getController();
-            
-            // Enviamos los datos reales al Checkout
-            List<String> extras = new ArrayList<>();
-            controller.setDatos(eventoActual, entradas, extras, 0.0);
+            controller.setDatos(eventoActual, entradas, new ArrayList<>(), 0.0);
 
             Stage stage = (Stage) rootPane.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Finalizar Compra - " + eventoActual.getNombre());
         } catch (Exception e) {
-            e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo cargar la vista de pago.");
+            mostrarAlerta("Error", e.getMessage(), Alert.AlertType.ERROR);
+            cargarAsientos(zona); // Refrescar para mostrar estado real
         }
     }
 
@@ -224,8 +233,8 @@ public class SeleccionEntradasController {
         stage.close();
     }
 
-    private void mostrarAlerta(String titulo, String msg) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
+    private void mostrarAlerta(String titulo, String msg, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(msg);
