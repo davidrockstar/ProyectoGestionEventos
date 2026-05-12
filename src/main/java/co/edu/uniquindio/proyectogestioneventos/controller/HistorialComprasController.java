@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyectogestioneventos.controller;
 
 import co.edu.uniquindio.proyectogestioneventos.MyApplication;
 import co.edu.uniquindio.proyectogestioneventos.model.Compra;
+import co.edu.uniquindio.proyectogestioneventos.model.Taquilla;
 import co.edu.uniquindio.proyectogestioneventos.model.Usuario;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.Rol;
@@ -9,6 +10,7 @@ import co.edu.uniquindio.proyectogestioneventos.service.ICompraService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.CompraServiceImpl;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class HistorialComprasController {
 
@@ -52,7 +55,6 @@ public class HistorialComprasController {
 
     public void setUsuario(Usuario usuario) {
         this.usuarioActual = usuario;
-        cargarHistorial();
     }
 
     @FXML
@@ -63,11 +65,17 @@ public class HistorialComprasController {
 
         cbEstado.setItems(FXCollections.observableArrayList(EstadoCompra.values()));
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("idCompra"));
-        colEvento.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvento().getNombre()));
-        colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
-        colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+        configurarColumnas();
+
+        // Cargar datos del usuario logueado INMEDIATAMENTE
+        Usuario logueado = MyApplication.getUsuarioLogueado();
+        setUsuario(logueado);
+        cargarHistorial(logueado);
+
+        // Listener para actualizaciones en tiempo real
+        Taquilla.getInstance().getCompras().addListener((ListChangeListener<Compra>) c -> {
+            cargarHistorial(MyApplication.getUsuarioLogueado());
+        });
 
         // Añadir listener para la tecla ESC al panel raíz
         rootPane.setOnKeyPressed(event -> {
@@ -77,11 +85,20 @@ public class HistorialComprasController {
         });
     }
 
-    private void cargarHistorial() {
-        if (usuarioActual != null) {
-            List<Compra> historial = compraService.obtenerHistorialCompras(usuarioActual, null, null, null);
-            tablaCompras.getItems().setAll(historial);
-            // Aquí se necesitaría configurar las celdas de las columnas para mostrar los datos de Compra
+    private void configurarColumnas() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("idCompra"));
+        colEvento.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvento().getNombre()));
+        colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
+        colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
+    }
+
+    private void cargarHistorial(Usuario usuario) {
+        if (usuario != null) {
+            List<Compra> historial = Taquilla.getInstance().getCompras().stream()
+                    .filter(c -> c.getUsuario() != null && c.getUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                    .collect(Collectors.toList());
+            tablaCompras.setItems(FXCollections.observableArrayList(historial));
         }
     }
 
