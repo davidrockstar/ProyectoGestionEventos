@@ -17,6 +17,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -47,59 +48,63 @@ public class MisComprasController {
     }
 
     private void cargarComprasActivas() {
+        if (usuarioActual == null) {
+            usuarioActual = MyApplication.getUsuarioLogueado();
+        }
+
         if (usuarioActual != null) {
-            List<Compra> historial = compraService.obtenerHistorialCompras(usuarioActual, null, null, null);
-            // Mostramos todas las compras relevantes para el usuario en esta vista
-            tablaMisCompras.setItems(FXCollections.observableArrayList(historial));
+            List<Compra> filtradas = Taquilla.getInstance().getCompras().stream()
+                    .filter(c -> c.getUsuario() != null && c.getUsuario().getIdUsuario().equals(usuarioActual.getIdUsuario()))
+                    .collect(Collectors.toList());
+            tablaMisCompras.setItems(FXCollections.observableArrayList(filtradas));
         }
     }
 
     @FXML
     private void initialize() {
+        configurarColumnas();
+        
+        // Cargar datos del usuario logueado al iniciar
+        setUsuario(MyApplication.getUsuarioLogueado());
+
+        // Listener único para actualizaciones en tiempo real desde el modelo global
+        Taquilla.getInstance().getCompras().addListener((ListChangeListener<Compra>) c -> {
+            cargarComprasActivas();
+        });
+    }
+
+    private void configurarColumnas() {
         colId.setCellValueFactory(new PropertyValueFactory<>("idCompra"));
         colEvento.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEvento().getNombre()));
         colFecha.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFechaCreacion().toLocalDate().toString()));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
         colEstado.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEstado().toString()));
-
-        // Listener para actualizar la tabla si se agrega una nueva compra a la Taquilla
-        Taquilla.getInstance().getCompras().addListener((ListChangeListener<Compra>) c -> {
-            cargarComprasActivas();
-        });
-
-        // Añadir listener para la tecla ESC al panel raíz
-        rootPane.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ESCAPE) {
-                onVolverClick(null);
-            }
-        });
     }
 
     @FXML
     void onModificarCompraClick(ActionEvent event) {
-        Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
-        if (compraSeleccionada != null) {
-            // Lógica para abrir pantalla de modificación de compra (RF-006)
-        }
+        // Este botón se eliminó de la vista FXML para simplificar el flujo
     }
 
     @FXML
     void onCancelarCompraClick(ActionEvent event) {
         Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
         if (compraSeleccionada != null) {
-            compraService.cancelarCompra(compraSeleccionada);
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Compra Cancelada");
-            alert.setContentText("La compra ha sido cancelada y los asientos liberados.");
-            alert.showAndWait();
-            cargarComprasActivas();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, 
+                "¿Está seguro de cancelar esta compra? Los asientos se liberarán inmediatamente.", 
+                ButtonType.YES, ButtonType.NO);
+            alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    compraService.cancelarCompra(compraSeleccionada);
+                    cargarComprasActivas(); // Refrescar tabla
+                }
+            });
         }
     }
 
     @FXML
     void onPagarCompraClick(ActionEvent event) {
-        // Reutilizamos el detalle para proceder al pago
-        onVerDetalleCompraClick(event);
+        // Este botón se eliminó de la vista FXML para simplificar el flujo
     }
 
     @FXML
@@ -107,20 +112,20 @@ public class MisComprasController {
         Compra compraSeleccionada = tablaMisCompras.getSelectionModel().getSelectedItem();
         if (compraSeleccionada != null) {
             try {
-                Usuario usuario = MyApplication.getUsuarioLogueado();
-                String basePath = (usuario != null && usuario.getRol() == Rol.ADMINISTRADOR) ? "administrador/" : "cliente/";
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/" + basePath + "DetalleCompraView.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/DetalleCompraView.fxml"));
                 Parent root = loader.load();
+                
                 DetalleCompraController controller = loader.getController();
                 controller.setCompra(compraSeleccionada);
 
                 Stage stage = new Stage();
-                stage.setTitle("Detalle de la Compra");
+                stage.setTitle("Detalle de Compra");
                 stage.setScene(new Scene(root));
                 stage.initModality(Modality.APPLICATION_MODAL);
-                // Usar el rootPane para obtener la ventana propietaria de forma más robusta
                 stage.initOwner(rootPane.getScene().getWindow());
                 stage.showAndWait();
+                
+                cargarComprasActivas(); // Refrescar por si se pagó dentro del detalle
             } catch (IOException e) {
                 e.printStackTrace();
             }

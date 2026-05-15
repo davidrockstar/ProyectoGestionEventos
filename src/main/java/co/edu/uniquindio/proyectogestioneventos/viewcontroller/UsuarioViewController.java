@@ -49,7 +49,7 @@ public class UsuarioViewController {
 
     @FXML
     void onHistorialComprasClick() {
-        abrirVentana("historialComprasView.fxml", "Historial de Compras");
+        abrirVentana("HistorialComprasView.fxml", "Historial de Compras");
     }
 
     @FXML
