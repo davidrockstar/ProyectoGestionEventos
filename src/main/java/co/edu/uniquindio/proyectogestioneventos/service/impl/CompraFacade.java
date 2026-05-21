@@ -76,13 +76,8 @@ public class CompraFacade {
         // 5. Procesar el pago a través del servicio (esto maneja estados y asientos)
         compraService.realizarPago(compraBase, motorDePago);
 
-        // 6. Transición final a CONFIRMADA (RF-010)
-        if (compraBase.getEstado() == EstadoCompra.PAGADA) {
-            compraBase.setEstado(EstadoCompra.CONFIRMADA);
-        }
-
-        if (compraBase.getEstado() != EstadoCompra.CONFIRMADA) {
-            throw new Exception("El pago falló o la compra no pudo ser confirmada.");
+        if (compraBase.getEstado() != EstadoCompra.PAGADA) {
+            throw new Exception("El pago falló o la compra no pudo ser procesada.");
         }
 
         return compraDecorada;

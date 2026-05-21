@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="650.0" prefWidth="500.0" style="-fx-background-color: #f4f7f6;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="proyectogestioneventos.controller.CheckoutViewController">
+    <children>
+        <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <padding>
+                <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
+            </padding>
+            <children>
+                <Text fill="#2c3e50" strokeType="OUTSIDE" strokeWidth="0.0" text="Confirmación de Pedido">
+                    <font><Font name="System Bold" size="26.0" /></font>
+                </Text>
+                <Label text="Revise los detalles antes de confirmar su pago." textFill="#7f8c8d" />
+                <Separator />
+
+                <VBox spacing="8.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                    <children>
+                        <Label text="EVENTO" textFill="#3498db">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <Label fx:id="lblNombreEvento" text="Nombre del Evento" textFill="#2c3e50">
+                            <font><Font name="System Bold" size="18.0" /></font>
+                        </Label>
+                        <GridPane hgap="10.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+                            </columnConstraints>
+                            <children>
+                                <Label text="Fecha:" textFill="#7f8c8d" />
+                                <Label fx:id="lblFechaEvento" text="--" GridPane.columnIndex="1" />
+                                <Label text="Lugar:" textFill="#7f8c8d" GridPane.rowIndex="1" />
+                                <Label fx:id="lblCiudadEvento" text="--" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <Label text="Recinto:" textFill="#7f8c8d" GridPane.rowIndex="2" />
+                                <Label fx:id="lblRecintoEvento" text="--" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            </children>
+                        </GridPane>
+                    </children>
+                </VBox>
+
+                <VBox spacing="8.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                    <children>
+                        <Label text="ENTRADA Y ASIENTO" textFill="#3498db">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" spacing="20.0">
+                            <children>
+                                <VBox>
+                                    <Label text="Zona" textFill="#7f8c8d" style="-fx-font-size: 11;" />
+                                    <Label fx:id="lblZona" text="--" />
+                                </VBox>
+                                <VBox>
+                                    <Label text="Asiento" textFill="#7f8c8d" style="-fx-font-size: 11;" />
+                                    <Label fx:id="lblAsiento" text="--" />
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Label fx:id="lblPrecioBase" text="\$ 0.00">
+                                    <font><Font name="System Bold" size="15.0" /></font>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <VBox spacing="8.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                    <children>
+                        <Label text="SERVICIOS ADICIONALES" textFill="#3498db">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <VBox fx:id="vboxServicios" spacing="4.0" />
+                        <HBox alignment="CENTER_RIGHT">
+                            <children>
+                                <Label text="Subtotal Extras: " textFill="#7f8c8d" />
+                                <Label fx:id="lblTotalExtras" text="\$ 0.00" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+
+                <VBox spacing="10.0" style="-fx-background-color: #2c3e50; -fx-padding: 20; -fx-background-radius: 8;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label text="Método de Pago:" textFill="WHITE" />
+                                <ComboBox fx:id="cbMetodoPago" prefWidth="200.0" promptText="Seleccione..." />
+                            </children>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                            <children>
+                                <Label text="TOTAL FINAL:" textFill="WHITE" />
+                                <Label fx:id="lblTotalFinal" text="\$ 0.00" textFill="#2ecc71">
+                                    <font><Font name="System Bold" size="26.0" /></font>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <HBox spacing="15.0">
+                    <children>
+                        <Button onAction="#onCancelarCompra" prefHeight="45.0" prefWidth="220.0" style="-fx-background-color: white; -fx-border-color: #e74c3c; -fx-text-fill: #e74c3c; -fx-font-weight: bold;" text="CANCELAR" />
+                        <Button onAction="#onConfirmarCompra" prefHeight="45.0" prefWidth="220.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;" text="CONFIRMAR COMPRA" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

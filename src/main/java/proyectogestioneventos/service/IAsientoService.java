@@ -1,0 +1,11 @@
+package proyectogestioneventos.service;
+
+import proyectogestioneventos.model.Asiento;
+import proyectogestioneventos.model.enums.EstadoAsiento;
+import java.util.List;
+
+public interface IAsientoService {
+    List<Asiento> listarAsientos(String idRecinto, String idZona);
+    void cambiarEstadoAsiento(String idRecinto, String idZona, Long idAsiento, EstadoAsiento nuevoEstado) throws Exception;
+    void generarDatosPrueba(String idRecinto, String idZona) throws Exception;
+}

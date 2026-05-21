@@ -108,11 +108,6 @@ public class GestionEventosViewController {
     }
 
     @FXML
-    void onPausarEventoClick(ActionEvent event) {
-        cambiarEstadoEventoSeleccionado(EstadoEvento.PAUSADO, "Pausar Evento");
-    }
-
-    @FXML
     void onCancelarEventoClick(ActionEvent event) {
         cambiarEstadoEventoSeleccionado(EstadoEvento.CANCELADO, "Cancelar Evento");
     }

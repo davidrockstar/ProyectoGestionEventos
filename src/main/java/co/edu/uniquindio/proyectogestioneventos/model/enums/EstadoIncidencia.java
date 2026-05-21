@@ -1,7 +1,8 @@
 package co.edu.uniquindio.proyectogestioneventos.model.enums;
 
 public enum EstadoIncidencia {
-    PENDIENTE,
+    ABIERTA,
+    EN_PROCESO,
     RESUELTA,
     CERRADA
 }

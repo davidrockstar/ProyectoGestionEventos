@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="rootPane" minHeight="800.0" minWidth="1200.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="proyectogestioneventos.viewcontroller.PanelMetricasAdminViewController">
+   <children>
+      <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+         <content>
+            <VBox spacing="15.0">
+               <children>
+            <Label text="Panel de Métricas (Administrador)">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <HBox spacing="20.0" alignment="CENTER">
+               <children>
+                  <VBox alignment="CENTER" prefWidth="200.0" style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-background-radius: 10;">
+                     <children>
+                        <Label text="Total Usuarios" />
+                        <Label fx:id="lblTotalUsuarios" text="0">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox alignment="CENTER" prefWidth="200.0" style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-background-radius: 10;">
+                     <children>
+                        <Label text="Total Eventos" />
+                        <Label fx:id="lblTotalEventos" text="0">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox alignment="CENTER" prefWidth="200.0" style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-background-radius: 10;">
+                     <children>
+                        <Label text="Total Compras" />
+                        <Label fx:id="lblTotalCompras" text="0">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox alignment="CENTER" prefWidth="200.0" style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-background-radius: 10;">
+                     <children>
+                        <Label text="Ingresos Totales" />
+                        <Label fx:id="lblIngresosTotales" text="\$ 0.00" textFill="#28a745">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Fecha Inicio" />
+                        <DatePicker fx:id="dpInicio" prefWidth="130.0" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Fecha Fin" />
+                        <DatePicker fx:id="dpFin" prefWidth="130.0" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Categoría" />
+                        <ComboBox fx:id="cbCategoriaFiltro" prefWidth="150.0" promptText="Todas" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Evento" />
+                        <ComboBox fx:id="cbEventoFiltro" prefWidth="180.0" promptText="Todos" />
+                     </children>
+                  </VBox>
+                  <Button mnemonicParsing="false" onAction="#onActualizarMetricasClick" text="Actualizar Métricas" />
+                  <Button mnemonicParsing="false" onAction="#onLimpiarFiltrosClick" text="Limpiar" />
+               </children>
+            </HBox>
+            <Separator />
+            <HBox spacing="20.0" alignment="CENTER" style="-fx-background-color: #eeeeee; -fx-padding: 10; -fx-background-radius: 5;">
+               <children>
+                  <VBox alignment="CENTER"><children><Label text="Evento más Vendido" /><Label fx:id="lblEventoMasVendido" text="-" style="-fx-font-weight: bold;" /></children></VBox>
+                  <Separator orientation="VERTICAL" />
+                  <VBox alignment="CENTER"><children><Label text="Zona más Ocupada" /><Label fx:id="lblZonaMasOcupada" text="-" style="-fx-font-weight: bold;" /></children></VBox>
+                  <Separator orientation="VERTICAL" />
+                  <VBox alignment="CENTER"><children><Label text="Usuario más Activo" /><Label fx:id="lblUsuarioMasActivo" text="-" style="-fx-font-weight: bold;" /></children></VBox>
+                  <Separator orientation="VERTICAL" />
+                  <VBox alignment="CENTER"><children><Label text="Ingreso Promedio" /><Label fx:id="lblIngresosPromedio" text="\$ 0.00" style="-fx-font-weight: bold;" /></children></VBox>
+               </children>
+            </HBox>
+            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <VBox HBox.hgrow="ALWAYS" spacing="10.0">
+                     <children>
+                        <Label text="Ventas por Periodo">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <LineChart fx:id="ventasPorPeriodoChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="ventasPeriodoXAxis" label="Periodo" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="ventasPeriodoYAxis" label="Ventas" />
+                           </yAxis>
+                        </LineChart>
+                        <Label text="Ingresos por Servicios (Extras)">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <PieChart fx:id="ingresosServiciosAdicionalesChart" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+                  <VBox HBox.hgrow="ALWAYS" spacing="10.0">
+                     <children>
+                        <Label text="Ocupación por Zona">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <BarChart fx:id="ocupacionPorZonaChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="ocupacionZonaXAxis" label="Zona" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="ocupacionZonaYAxis" label="Porcentaje de Ocupación" />
+                           </yAxis>
+                        </BarChart>
+                        <Label text="Tasa de Cancelación">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblTasaCancelacion" text="0.0%" VBox.vgrow="ALWAYS">
+                           <font>
+                              <Font name="System Bold" size="36.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="20.0" top="20.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Label text="Recaudación por Evento">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <BarChart fx:id="topEventosChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis fx:id="topEventosXAxis" label="Evento" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis fx:id="topEventosYAxis" label="Cantidad / Ingresos" />
+                           </yAxis>
+                        </BarChart>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </VBox>
+         </content>
+      </ScrollPane>
+      <HBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1 0 0 0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefHeight="60.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#onScrollUpClick" prefWidth="120.0" style="-fx-background-color: #6c757d; -fx-text-fill: white;" text="↑ Subir" />
+            <Button mnemonicParsing="false" onAction="#onScrollDownClick" prefWidth="120.0" style="-fx-background-color: #6c757d; -fx-text-fill: white;" text="↓ Bajar" />
+            <Separator orientation="VERTICAL" />
+            <Button mnemonicParsing="false" onAction="#onVolverClick" prefWidth="100.0" text="Volver" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" top="10.0" />
+         </padding>
+      </HBox>
+   </children>
+</AnchorPane>

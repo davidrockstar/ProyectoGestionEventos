@@ -73,8 +73,9 @@ public class DetalleCompraController {
         // Construir string de entradas
         StringBuilder entradasStr = new StringBuilder();
         compraActual.getListaEntradas().forEach(entrada ->
-                entradasStr.append("Zona: ").append(entrada.getZona().getNombre())
-                        .append(", Asiento: ").append(entrada.getAsiento() != null ? entrada.getAsiento().getFila() + entrada.getAsiento().getNumero() : "N/A")
+                entradasStr.append("ID Entrada: ").append(entrada.getIdEntrada()) // Mostrar el nuevo Long ID
+                        .append(" | Zona: ").append(entrada.getZona().getNombre())
+                        .append(" | Asiento: ").append(entrada.getAsiento() != null ? entrada.getAsiento().getCodigo() : "N/A") // Mostrar el código de negocio del asiento
                         .append(", Precio: $").append(entrada.getPrecioFinal()).append("\n")
         );
         txtEntradas.setText(entradasStr.toString());

@@ -62,6 +62,7 @@ public class GestionComprasAdminViewController {
             new SimpleStringProperty(cellData.getValue().getFechaCreacion() != null ? 
                 cellData.getValue().getFechaCreacion().format(formatter) : "N/A"));
 
+        // precioTotal es double, TableColumn espera Double
         colTotal.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
         
         colEstado.setCellValueFactory(cellData -> 
@@ -177,16 +178,22 @@ public class GestionComprasAdminViewController {
                 return;
             }
 
-            // 3. Seleccionar el nuevo asiento
-            ChoiceDialog<Asiento> dialogAsiento = new ChoiceDialog<>(disponibles.get(0), disponibles);
+            // 3. Seleccionar el nuevo asiento usando una lista de Strings para la visualización
+            List<String> opcionesVisuales = disponibles.stream()
+                    .map(a -> a.getCodigo() + " (Fila: " + a.getFila() + ", Número: " + a.getNumero() + ")")
+                    .collect(Collectors.toList());
+
+            ChoiceDialog<String> dialogAsiento = new ChoiceDialog<>(opcionesVisuales.get(0), opcionesVisuales);
             dialogAsiento.setTitle("Reasignar Asiento");
             dialogAsiento.setHeaderText("Paso 2: Seleccione el nuevo asiento para " + entrada.getZona().getNombre());
             dialogAsiento.setContentText("Nuevo Asiento:");
 
-            Optional<Asiento> resultAsiento = dialogAsiento.showAndWait();
+            Optional<String> resultAsiento = dialogAsiento.showAndWait();
             if (resultAsiento.isPresent()) {
                 try {
-                    compraService.reasignarAsiento(seleccionada, entrada, (Asiento) resultAsiento.get());
+                    int index = opcionesVisuales.indexOf(resultAsiento.get());
+                    Asiento asientoSeleccionado = disponibles.get(index);
+                    compraService.reasignarAsiento(seleccionada, entrada, asientoSeleccionado);
                     actualizarTabla();
                     mostrarAlerta("Éxito", "Asiento reasignado correctamente.", Alert.AlertType.INFORMATION);
                 } catch (Exception e) {

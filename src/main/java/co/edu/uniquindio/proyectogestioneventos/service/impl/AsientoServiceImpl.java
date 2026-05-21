@@ -17,18 +17,18 @@ public class AsientoServiceImpl implements IAsientoService {
     }
     
     @Override
-    public void cambiarEstadoAsiento(String idRecinto, String idZona, String idAsiento, EstadoAsiento nuevoEstado) throws Exception {
+    public void cambiarEstadoAsiento(String idRecinto, String idZona, Long idAsiento, EstadoAsiento nuevoEstado) throws Exception {
         Zona zona = obtenerZona(idRecinto, idZona).orElseThrow(() -> new Exception("Zona no encontrada"));
         
         Asiento asiento = zona.getListaAsientos().stream()
-                .filter(a -> a.getIdAsiento().equals(idAsiento))
+                .filter(a -> a.getIdAsiento().equals(idAsiento) || (a.getCodigo() != null && a.getCodigo().equals(String.valueOf(idAsiento)))) // Buscar por Long ID o por String codigo si se pasa como String
                 .findFirst()
                 .orElseThrow(() -> new Exception("Asiento no encontrado"));
 
-        // Validaciones de transición de estados reales
-        if (nuevoEstado == EstadoAsiento.BLOQUEADO && 
-            (asiento.getEstado() == EstadoAsiento.VENDIDO || asiento.getEstado() == EstadoAsiento.RESERVADO)) {
-            throw new Exception("No se puede bloquear un asiento que ya tiene una transacción (Vendido/Reservado).");
+        // Validaciones de transición de estados
+        if (nuevoEstado == EstadoAsiento.INHABILITADO && 
+            (asiento.getEstado() == EstadoAsiento.OCUPADO || asiento.getEstado() == EstadoAsiento.RESERVADO)) {
+            throw new Exception("No se puede inhabilitar un asiento que ya tiene una transacción (Ocupado/Reservado).");
         }
 
         // Validación de Doble Reserva
@@ -56,15 +56,16 @@ public class AsientoServiceImpl implements IAsientoService {
         for (int i = 0; i < capacidad; i++) {
             char letraFila = (char) ('A' + (i / asientosPorFila));
             String fila = String.valueOf(letraFila);
-            String numero = String.valueOf((i % asientosPorFila) + 1);
-            String id = idZona + "-" + fila + numero;
+            int numero = (i % asientosPorFila) + 1; // Cambiado a int
+            Long id = (long) (i + 1); // ID numérico para el asiento
+            String codigo = idZona + "-" + fila + numero; // Código de negocio (String)
             
             EstadoAsiento estado = EstadoAsiento.DISPONIBLE;
-            // Simular algunos bloqueados y vendidos
-            if (i % 12 == 0) estado = EstadoAsiento.BLOQUEADO;
-            if (i % 15 == 0) estado = EstadoAsiento.VENDIDO;
+            // Simular algunos inhabilitados y ocupados
+            if (i % 12 == 0) estado = EstadoAsiento.INHABILITADO;
+            if (i % 15 == 0) estado = EstadoAsiento.OCUPADO;
 
-            zona.getListaAsientos().add(new Asiento(id, fila, numero, estado));
+            zona.getListaAsientos().add(new Asiento(id, codigo, fila, numero, estado)); // Constructor actualizado
         }
     }
 

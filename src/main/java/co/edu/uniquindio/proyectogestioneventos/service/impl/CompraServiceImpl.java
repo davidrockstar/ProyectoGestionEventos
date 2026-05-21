@@ -37,8 +37,10 @@ public class CompraServiceImpl implements ICompraService {
         if (asiento.getEstado() != EstadoAsiento.DISPONIBLE) {
             throw new Exception("El asiento ya no está disponible.");
         }
-        String idEntrada = "EN-" + UUID.randomUUID().toString().substring(0, 4);
-        Entrada entrada = new Entrada(idEntrada, zona, asiento, zona.getPrecioBase(), EstadoEntrada.ACTIVA);
+        Long idEntrada = (long) (compra.getListaEntradas().size() + 1); // Generar un ID Long simple
+        Entrada entrada = new Entrada(idEntrada, zona, asiento, zona.getPrecioBase(), EstadoEntrada.VALIDADA,
+                                      compra.getEvento(), // El evento de la compra
+                                      compra.getUsuario()); // El propietario es el usuario de la compra
         compra.agregarEntrada(entrada);
         asiento.setEstado(EstadoAsiento.RESERVADO);
     }
@@ -58,7 +60,7 @@ public class CompraServiceImpl implements ICompraService {
     @Override
     public void cancelarCompra(Compra compra) {
         // Regla: Cualquier asiento asociado a una compra cancelada vuelve a estar DISPONIBLE
-        // (Cubre transiciones: RESERVADO -> DISPONIBLE y VENDIDO -> DISPONIBLE)
+        // (Cubre transiciones: RESERVADO -> DISPONIBLE y OCUPADO -> DISPONIBLE)
         compra.getListaEntradas().forEach(entrada -> {
             if (entrada.getAsiento() != null) {
                 entrada.getAsiento().setEstado(EstadoAsiento.DISPONIBLE);
@@ -81,11 +83,11 @@ public class CompraServiceImpl implements ICompraService {
         compra.pagar();
 
         // Sincronización de Estados de Asientos
-        if (compra.getEstado() == EstadoCompra.PAGADA || compra.getEstado() == EstadoCompra.CONFIRMADA) {
+        if (compra.getEstado() == EstadoCompra.PAGADA) {
             compra.getListaEntradas().forEach(entrada -> {
                 if (entrada.getAsiento() != null) {
-                    entrada.getAsiento().setEstado(EstadoAsiento.VENDIDO);
-                    entrada.setEstado(EstadoEntrada.ACTIVA);
+                    entrada.getAsiento().setEstado(EstadoAsiento.OCUPADO);
+                    entrada.setEstado(EstadoEntrada.VALIDADA);
                 }
             });
             // Notificar una sola vez al final del proceso de pago
@@ -116,7 +118,7 @@ public class CompraServiceImpl implements ICompraService {
 
     @Override
     public void registrarReembolso(Compra compra) throws Exception {
-        if (compra == null || (compra.getEstado() != EstadoCompra.PAGADA && compra.getEstado() != EstadoCompra.CONFIRMADA && compra.getEstado() != EstadoCompra.INCIDENCIA)) {
+        if (compra == null || compra.getEstado() != EstadoCompra.PAGADA) {
             throw new Exception("Solo se pueden reembolsar compras con pago registrado.");
         }
 
@@ -141,8 +143,8 @@ public class CompraServiceImpl implements ICompraService {
             entrada.getAsiento().setEstado(EstadoAsiento.DISPONIBLE);
         }
 
-        boolean estaPagada = (compra.getEstado() == EstadoCompra.PAGADA || compra.getEstado() == EstadoCompra.CONFIRMADA);
-        nuevoAsiento.setEstado(estaPagada ? EstadoAsiento.VENDIDO : EstadoAsiento.RESERVADO);
+        boolean estaPagada = (compra.getEstado() == EstadoCompra.PAGADA);
+        nuevoAsiento.setEstado(estaPagada ? EstadoAsiento.OCUPADO : EstadoAsiento.RESERVADO);
         entrada.setAsiento(nuevoAsiento);
         Taquilla.getInstance().incrementMetricsUpdateCounter(); // Notificar cambio para métricas
     }

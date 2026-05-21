@@ -22,6 +22,7 @@ public class Compra implements Comprable, ISujeto {
     private List<ServicioAdicional> listaServiciosAdicionales;
     private List<IObservador> observadores;
     private IPago metodoPago; // Almacena la estrategia de pago elegida
+    private Pago registroPago; // Nueva relación con entidad Pago
 
     public Compra(String idCompra, Usuario usuario, Evento evento, LocalDateTime fechaCreacion, EstadoCompra estado) {
         this.idCompra = idCompra;
@@ -57,6 +58,8 @@ public class Compra implements Comprable, ISujeto {
     public void setListaServiciosAdicionales(List<ServicioAdicional> listaServiciosAdicionales) { this.listaServiciosAdicionales = listaServiciosAdicionales; }
     public IPago getMetodoPago() { return metodoPago; }
     public void setMetodoPago(IPago metodoPago) { this.metodoPago = metodoPago; }
+    public Pago getRegistroPago() { return registroPago; }
+    public void setRegistroPago(Pago registroPago) { this.registroPago = registroPago; }
 
     // Gestión del estado (Patrón State)
     public EstadoCompra getEstado() { return estado; }
@@ -67,12 +70,9 @@ public class Compra implements Comprable, ISujeto {
             // Sincroniza el objeto de estado con el enum
             switch (nuevoEstado) {
                 case CREADA:
-                case PENDIENTE:
-                case INCIDENCIA:
                     this.estadoInterno = new EstadoCreada();
                     break;
                 case PAGADA:
-                case CONFIRMADA:
                     this.estadoInterno = new EstadoPagada();
                     break;
                 case CANCELADA:

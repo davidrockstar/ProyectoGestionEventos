@@ -187,7 +187,7 @@ public class PanelMetricasAdminViewController {
 
             // Regla 2: Ingresos Reales (Solo PAGADAS o CONFIRMADAS)
             double ingresosTotales = filtradas.stream()
-                    .filter(c -> c.getEstado() == EstadoCompra.CONFIRMADA || c.getEstado() == EstadoCompra.PAGADA)
+                    .filter(c -> c.getEstado() == EstadoCompra.PAGADA)
                     .mapToDouble(Compra::getPrecioTotal).sum();
             if (lblIngresosTotales != null) lblIngresosTotales.setText(String.format("$ %,.2f", ingresosTotales));
 
@@ -201,7 +201,7 @@ public class PanelMetricasAdminViewController {
                     lblTasaCancelacion.setText(String.format("%.1f%%", (double) canceladas / totalFiltradas * 100));
 
                 // Ingresos Promedio: Ingresos Totales / Cantidad de compras que generaron dinero
-                long exitosas = filtradas.stream().filter(c -> c.getEstado() == EstadoCompra.PAGADA || c.getEstado() == EstadoCompra.CONFIRMADA).count();
+                long exitosas = filtradas.stream().filter(c -> c.getEstado() == EstadoCompra.PAGADA).count();
                 if (lblIngresosPromedio != null)
                     lblIngresosPromedio.setText(String.format("$ %,.2f", exitosas > 0 ? ingresosTotales / exitosas : 0));
 
@@ -286,7 +286,7 @@ public class PanelMetricasAdminViewController {
         ingresosServiciosAdicionalesChart.getData().clear();
 
         Map<String, Double> porCat = filtradas.stream()
-                .filter(c -> c.getEvento() != null && (c.getEstado() == EstadoCompra.CONFIRMADA || c.getEstado() == EstadoCompra.PAGADA))
+                .filter(c -> c.getEvento() != null && c.getEstado() == EstadoCompra.PAGADA)
                 .collect(Collectors.groupingBy(c -> c.getEvento().getCategoria() != null ? c.getEvento().getCategoria() : "Otros",
                         Collectors.summingDouble(Compra::getPrecioTotal)));
 

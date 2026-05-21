@@ -72,10 +72,10 @@ public class DatosIniciales {
         taquilla.getServicios().add(new ServicioAdicional("S03", "Merchandising Oficial", "Camiseta y gorra del evento.", 45000));
 
         // 5. Generar Compras Reales de Prueba (Para alimentar métricas e historial)
-        generarCompra(cliente1, concierto, 2, EstadoCompra.CONFIRMADA, false);
+        generarCompra(cliente1, concierto, 2, EstadoCompra.PAGADA, false);
         generarCompra(cliente2, festival, 1, EstadoCompra.PAGADA, true);
         generarCompra(cliente3, concierto, 1, EstadoCompra.CANCELADA, false);
-        generarCompra(cliente1, festival, 2, EstadoCompra.CONFIRMADA, true);
+        generarCompra(cliente1, festival, 2, EstadoCompra.PAGADA, true);
     }
 
     /**
@@ -92,14 +92,15 @@ public class DatosIniciales {
             int filaNum = (i / ASIENTOS_POR_FILA);
             int colNum = (i % ASIENTOS_POR_FILA) + 1;
             
+            Long idAsiento = (long) (i + 1); // ID numérico para el asiento
             // Convertir número de fila a letra (1->A, 2->B, etc.)
             String filaLetra = String.valueOf((char) ('A' + filaNum));
 
             // Todos los asientos inician DISPONIBLES; la compra cambiará su estado
-            Asiento asiento = new Asiento(
-                idZona + "-S" + (i + 1), // ID Único: Zona + Serial
+            Asiento asiento = new Asiento(idAsiento, // Nuevo Long ID
+                idZona + "-S" + (i + 1), // Código de negocio (String)
                 filaLetra, 
-                String.valueOf(colNum), 
+                colNum, // Nuevo int numero
                 EstadoAsiento.DISPONIBLE
             );
             asientos.add(asiento);
@@ -127,13 +128,15 @@ public class DatosIniciales {
             for (Asiento asiento : zona.getListaAsientos()) {
                 if (asiento.getEstado() == EstadoAsiento.DISPONIBLE && asignados < cantEntradas) {
                     // Crear entrada real
-                    Entrada entrada = new Entrada("E-" + UUID.randomUUID().toString().substring(0, 8), 
-                                                  zona, asiento, zona.getPrecioBase(), EstadoEntrada.ACTIVA);
+                Long idEntrada = (long) (taquilla.getCompras().size() * 1000 + asignados + 1); // ID único para la entrada
+                Entrada entrada = new Entrada(idEntrada, // Nuevo Long ID
+                                              zona, asiento, zona.getPrecioBase(), EstadoEntrada.VALIDADA,
+                                              evento, usuario); // Nuevos atributos evento y propietario
                     entradas.add(entrada);
 
                     // Actualizar estado del asiento si la compra es válida
-                    if (estado == EstadoCompra.PAGADA || estado == EstadoCompra.CONFIRMADA) {
-                        asiento.setEstado(EstadoAsiento.VENDIDO);
+                    if (estado == EstadoCompra.PAGADA) {
+                        asiento.setEstado(EstadoAsiento.OCUPADO);
                     }
                     asignados++;
                 }
