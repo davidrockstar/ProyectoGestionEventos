@@ -1,51 +1,90 @@
-Plataforma de Gestión de Eventos y Venta de Entradas
-Descripción del Proyecto
-Este sistema es una solución integral para la exploración de eventos, selección de asientos y compra de entradas, permitiendo además la gestión administrativa y visualización de métricas de rendimiento
+# Proyecto Gestión de Eventos
 
-Pensamiento Computacional (RF-043)
-¿Qué se solicita finalmente? Una plataforma para usuarios (compra de entradas) y administradores (gestión de catálogo y métricas)
+## Integrantes
+- Juan David Cardona Petrel
+- Santiago Barrero López
 
-¿Qué información es relevante? Datos de usuarios, eventos, recintos, zonas, asientos, compras e incidencias
+# Descripción del Proyecto
 
-¿Cómo se agrupa la información? Mediante un diagrama de clases con entidades de dominio y estructuras de soporte para patrones
+Aplicación desarrollada en JavaFX para la gestión de eventos, compras y administración de recintos.  
+El sistema permite:
 
-¿Qué funcionalidades se solicitan? Registro, búsqueda de eventos, selección de asientos, gestión de carrito, pagos y reportes (CSV/PDF)
+- Gestión de usuarios y autenticación.
+- Exploración y compra de eventos.
+- Administración de recintos, zonas y asientos.
+- Gestión de compras y pagos.
+- Generación de reportes.
+- Panel administrativo con métricas.
 
-¿Cómo se distribuyen las funcionalidades? Segregadas por perfiles (Usuario/Admin) y siguiendo principios SOLID
+# Tecnologías Utilizadas
 
-¿Qué debo hacer para probar las funcionalidades? Inicializar el sistema con datos precargados y realizar flujos completos de venta
+- Java 17
+- JavaFX
+- Maven
+- Scene Builder
 
-¿Qué puedo reutilizar? Librerías como Apache POI/PDFBox y patrones de diseño estándar
+# Patrones de Diseño Implementados
+## Creacionales: Singleton, Factory y Builder
 
-¿Cómo pruebo/escribo la solución en Java? Desarrollo en Java con JavaFX, aplicando SOLID y control de versiones con Git
+Propósito Singleton: garantizar una única instancia compartida.
+Uso: manejo centralizado de datos y servicios.
 
-Patrones de Diseño Implementados
-Patrones Creacionales (RF-049)
-Singleton (Obligatorio): Garantiza una instancia única para la persistencia en memoria (clase Taquilla)
+Propósito Factory: creación de distintos tipos de usuarios. Clase: UsuarioFactory.
 
-Factory Method: Centraliza la creación de diferentes tipos de usuarios (Admin, Cliente)
+Builder
+Propósito Builder: construcción flexible de compras complejas. Clase: CompraBuilder.
 
-Builder: Permite la construcción paso a paso de objetos complejos como Compra
+## Estructurales: Decorator, Adapter y Facade
 
-Patrones Estructurales (RF-050)
-Decorator (Obligatorio): Añade servicios adicionales (seguros, VIP) a la compra de forma dinámica
+Propósito Decorator: agregar funcionalidades adicionales a una compra.
+Clases: VIPDecorator, SeguroDecorator, MerchandisingDecorator.
 
-Adapter: Unifica interfaces de pasarelas de pago externas (PayPal, Stripe)
+Propósito Adapter: integrar diferentes métodos de pago.
+Clases: PayPalAdapter, StripeAdapter.
 
-Facade: Simplifica el flujo de compra orquestando múltiples servicios internos
+Propósito: simplificar el proceso de compra.
+Clase: CompraFacade.
 
-Patrones de Comportamiento (RF-051)
-Strategy (Obligatorio): Permite intercambiar algoritmos de pago en tiempo de ejecución
+## Comportamiento: Strategy, State y Observer
+Propósito Strategy: permitir diferentes estrategias de pago.
+Interfaces y clases: IPago, PagoPaypal, PagoStripe.
 
-State: Gestiona el ciclo de vida de una compra (Creada, Pagada, Cancelada)
+Propósito State: manejar estados de compra.
+Clases: EstadoCreada, EstadoPagada, EstadoCancelada.
 
-Observer: Notifica a los usuarios sobre cambios de estado en sus eventos o compras
-.
-Tecnologías Utilizadas
-Lenguaje: Java
-Interfaz Gráfica: JavaFX (con JavaFX Charts para métricas)
-.
-Reportes: Apache POI / PDFBox
-.
-Control de Versiones: Git con estrategia de ramas activa
-.
+Propósito Observer: notificar cambios y eventos del sistema.
+Interfaces: IObservador, ISujeto.
+
+# Principios SOLID Aplicados
+## SRP (Single Responsibility Principle)
+Separación entre modelos, servicios y controladores.
+## OCP (Open/Closed Principle)
+Uso de Decorator y Strategy para extender funcionalidades sin modificar clases existentes.
+## DIP (Dependency Inversion Principle)
+Uso de interfaces como:
+
+- IEventoService
+- ICompraService
+- ISP (Interface Segregation Principle)
+
+Interfaces específicas para cada servicio del sistema.
+
+# Funcionalidades Principales
+- Registro e inicio de sesión.
+- Gestión de eventos.
+- Gestión de compras.
+- Gestión de recintos, zonas y asientos.
+- Gestión de incidencias.
+- Reportes operativos.
+- Panel administrativo.
+
+# Datos Iniciales
+
+El proyecto incluye datos precargados para:
+
+- Usuarios
+- Eventos
+- Recintos
+- Zonas
+- Compras
+- Pagos
