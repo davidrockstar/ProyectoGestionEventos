@@ -109,14 +109,9 @@ public class CheckoutViewController {
             IPago estrategiaPago = metodoSeleccionado.contains("Tarjeta") ? new PagoStripe() : new PagoPaypal();
             compraService.realizarPago(compraReal, estrategiaPago);
 
-            // 4. Transición Final (PAGADA -> CONFIRMADA)
-            if (compraReal.getEstado() == EstadoCompra.PAGADA) {
-                compraReal.setEstado(EstadoCompra.CONFIRMADA);
-            }
-
             mostrarAlerta("¡Compra Exitosa!", "Gracias por su compra", 
                 "Su código de reserva es: " + compraReal.getIdCompra() + 
-                "\nLos asientos han sido confirmados como VENDIDOS.", Alert.AlertType.INFORMATION);
+                "\nLos asientos han sido confirmados como OCUPADOS.", Alert.AlertType.INFORMATION);
             
             navegarAMisCompras();
 
@@ -153,8 +148,8 @@ public class CheckoutViewController {
         try {
             for (Entrada entrada : entradas) {
                 if (entrada.getAsiento() != null) {
-                    asientoService.cambiarEstadoAsiento(evento.getRecinto().getIdRecinto(), 
-                        entrada.getZona().getIdZona(), entrada.getAsiento().getIdAsiento(), EstadoAsiento.DISPONIBLE);
+                    asientoService.cambiarEstadoAsiento(evento.getRecinto().getIdRecinto(),
+                        entrada.getZona().getIdZona(), entrada.getAsiento().getIdAsiento(), EstadoAsiento.DISPONIBLE); // idAsiento ahora es Long
                 }
             }
             cerrarVentana();

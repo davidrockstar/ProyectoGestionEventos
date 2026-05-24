@@ -8,6 +8,7 @@ import co.edu.uniquindio.proyectogestioneventos.service.IAsientoService;
 import co.edu.uniquindio.proyectogestioneventos.service.IRecintoService;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.AsientoServiceImpl;
 import co.edu.uniquindio.proyectogestioneventos.service.impl.RecintoServiceImpl;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,7 +24,10 @@ import javafx.util.StringConverter;
 public class GestionAsientosViewController {
 
     @FXML private TableView<Asiento> tablaAsientos;
-    @FXML private TableColumn<Asiento, String> colId, colFila, colNumero, colEstado;
+    @FXML private TableColumn<Asiento, Long> colId; // Cambiado a Long
+    @FXML private TableColumn<Asiento, String> colFila, colCodigo, colEstado; // Añadido colCodigo
+    @FXML private TableColumn<Asiento, Integer> colNumero;
+
     @FXML private ComboBox<Recinto> cbRecinto;
     @FXML private ComboBox<Zona> cbZona;
 
@@ -38,10 +42,13 @@ public class GestionAsientosViewController {
     }
 
     private void configurarTabla() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("idAsiento"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("idAsiento")); // Ahora es Long
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigo")); // Nuevo atributo
         colFila.setCellValueFactory(new PropertyValueFactory<>("fila"));
         colNumero.setCellValueFactory(new PropertyValueFactory<>("numero"));
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        colEstado.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getEstado() != null ?
+                        cellData.getValue().getEstado().toString() : "N/A"));
     }
 
     private void configurarCombos() {
@@ -109,8 +116,8 @@ public class GestionAsientosViewController {
             return;
         }
 
-        // Habilitar se usa principalmente para reactivar asientos BLOQUEADOS
-        if (seleccionado.getEstado() == EstadoAsiento.BLOQUEADO) {
+        // Habilitar se usa principalmente para reactivar asientos INHABILITADOS
+        if (seleccionado.getEstado() == EstadoAsiento.INHABILITADO) {
             procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Habilitar Asiento");
         } else {
             mostrarAlerta("Información", "El asiento ya se encuentra habilitado o tiene una reserva/venta activa.", Alert.AlertType.INFORMATION);
@@ -125,13 +132,13 @@ public class GestionAsientosViewController {
             return;
         }
 
-        // Validación: Solo se pueden bloquear asientos que no tengan compromisos comerciales
-        if (seleccionado.getEstado() == EstadoAsiento.VENDIDO || seleccionado.getEstado() == EstadoAsiento.RESERVADO) {
-            mostrarAlerta("Error", "Acción no permitida", "No se puede bloquear un asiento con estado: " + seleccionado.getEstado(), Alert.AlertType.ERROR);
+        // Validación: Solo se pueden inhabilitar asientos que no tengan compromisos comerciales
+        if (seleccionado.getEstado() == EstadoAsiento.OCUPADO || seleccionado.getEstado() == EstadoAsiento.RESERVADO) {
+            mostrarAlerta("Error", "Acción no permitida", "No se puede inhabilitar un asiento con estado: " + seleccionado.getEstado(), Alert.AlertType.ERROR);
             return;
         }
 
-        procesarCambioEstado(EstadoAsiento.BLOQUEADO, "Bloquear Asiento");
+        procesarCambioEstado(EstadoAsiento.INHABILITADO, "Inhabilitar Asiento");
     }
 
     @FXML
@@ -142,9 +149,9 @@ public class GestionAsientosViewController {
             return;
         }
 
-        if (seleccionado.getEstado() == EstadoAsiento.VENDIDO) {
+        if (seleccionado.getEstado() == EstadoAsiento.OCUPADO) {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-                "¿Desea liberar un asiento que ya ha sido VENDIDO? Esta acción no reembolsa el dinero automáticamente.", 
+                "¿Desea liberar un asiento que ya está OCUPADO? Esta acción no reembolsa el dinero automáticamente.", 
                 ButtonType.YES, ButtonType.NO);
             confirm.setTitle("Confirmar Liberación");
             confirm.showAndWait().ifPresent(response -> {
@@ -152,8 +159,8 @@ public class GestionAsientosViewController {
                     procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Liberar Asiento");
                 }
             });
-        } else if (seleccionado.getEstado() == EstadoAsiento.BLOQUEADO || seleccionado.getEstado() == EstadoAsiento.RESERVADO) {
-            // Los bloqueos y reservas se liberan directamente a DISPONIBLE
+        } else if (seleccionado.getEstado() == EstadoAsiento.INHABILITADO || seleccionado.getEstado() == EstadoAsiento.RESERVADO) {
+            // Las inhabilitaciones y reservas se liberan directamente a DISPONIBLE
             procesarCambioEstado(EstadoAsiento.DISPONIBLE, "Liberar Asiento");
         } else {
             mostrarAlerta("Información", "El asiento ya está disponible.", Alert.AlertType.INFORMATION);

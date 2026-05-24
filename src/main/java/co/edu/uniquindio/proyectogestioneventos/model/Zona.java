@@ -64,7 +64,7 @@ public class Zona {
             return 0.0;
         }
         long asientosOcupados = listaAsientos.stream()
-                .filter(asiento -> asiento.getEstado() == EstadoAsiento.VENDIDO || asiento.getEstado() == EstadoAsiento.RESERVADO)
+                .filter(asiento -> asiento.getEstado() == EstadoAsiento.OCUPADO || asiento.getEstado() == EstadoAsiento.RESERVADO)
                 .count();
         return (double) asientosOcupados / capacidad * 100;
     }

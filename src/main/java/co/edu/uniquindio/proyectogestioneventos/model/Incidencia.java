@@ -2,33 +2,37 @@ package co.edu.uniquindio.proyectogestioneventos.model;
 
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoIncidencia;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.TipoIncidencia;
-
 import java.time.LocalDateTime;
 
 public class Incidencia {
-    private String idIncidencia;
+    private Long idIncidencia; // Cambiado a Long
     private TipoIncidencia tipo;
     private String descripcion;
-    private LocalDateTime fecha;
-    private Usuario usuario;
-    private Evento evento;
+    private LocalDateTime fechaReporte; // Cambiado de 'fecha' a 'fechaReporte'
     private EstadoIncidencia estado;
+    private Usuario reportante; // Cambiado de 'usuario' a 'reportante'
+    private Evento evento;
+    private Compra compra; // Nueva relación opcional
 
-    public Incidencia(String idIncidencia, TipoIncidencia tipo, String descripcion, LocalDateTime fecha, Usuario usuario, Evento evento, EstadoIncidencia estado) {
+    public Incidencia() {} // Constructor vacío
+
+    // Constructor completo actualizado
+    public Incidencia(Long idIncidencia, TipoIncidencia tipo, String descripcion, LocalDateTime fechaReporte, EstadoIncidencia estado, Usuario reportante, Evento evento, Compra compra) {
         this.idIncidencia = idIncidencia;
         this.tipo = tipo;
         this.descripcion = descripcion;
-        this.fecha = fecha;
-        this.usuario = usuario;
+        this.fechaReporte = fechaReporte;
+        this.estado = (estado != null) ? estado : EstadoIncidencia.ABIERTA;
+        this.reportante = reportante;
         this.evento = evento;
-        this.estado = estado;
+        this.compra = compra;
     }
 
-    public String getIdIncidencia() {
+    public Long getIdIncidencia() {
         return idIncidencia;
     }
 
-    public void setIdIncidencia(String idIncidencia) {
+    public void setIdIncidencia(Long idIncidencia) {
         this.idIncidencia = idIncidencia;
     }
 
@@ -48,20 +52,28 @@ public class Incidencia {
         this.descripcion = descripcion;
     }
 
-    public LocalDateTime getFecha() {
-        return fecha;
+    public LocalDateTime getFechaReporte() {
+        return fechaReporte;
     }
 
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
+    public void setFechaReporte(LocalDateTime fechaReporte) {
+        this.fechaReporte = fechaReporte;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public EstadoIncidencia getEstado() {
+        return estado;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setEstado(EstadoIncidencia estado) {
+        this.estado = estado;
+    }
+
+    public Usuario getReportante() {
+        return reportante;
+    }
+
+    public void setReportante(Usuario reportante) {
+        this.reportante = reportante;
     }
 
     public Evento getEvento() {
@@ -72,11 +84,25 @@ public class Incidencia {
         this.evento = evento;
     }
 
-    public EstadoIncidencia getEstado() {
-        return estado;
+    public Compra getCompra() {
+        return compra;
     }
 
-    public void setEstado(EstadoIncidencia estado) {
-        this.estado = estado;
+    public void setCompra(Compra compra) {
+        this.compra = compra;
+    }
+
+    @Override
+    public String toString() {
+        return "Incidencia{" +
+                "idIncidencia=" + idIncidencia +
+                ", tipo=" + tipo +
+                ", descripcion='" + descripcion + '\'' +
+                ", fechaReporte=" + fechaReporte +
+                ", estado=" + estado +
+                ", reportante=" + (reportante != null ? reportante.getNombre() : "N/A") +
+                ", evento=" + (evento != null ? evento.getNombre() : "N/A") +
+                ", compra=" + (compra != null ? compra.getIdCompra() : "N/A") +
+                '}';
     }
 }

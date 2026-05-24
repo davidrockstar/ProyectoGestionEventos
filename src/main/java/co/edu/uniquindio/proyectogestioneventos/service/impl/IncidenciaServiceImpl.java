@@ -21,14 +21,16 @@ public class IncidenciaServiceImpl implements IIncidenciaService {
         if (usuario == null) throw new Exception("Debe seleccionar un usuario.");
         if (evento == null) throw new Exception("Debe seleccionar un evento.");
 
+        Long idIncidencia = (long) (Taquilla.getInstance().getIncidencias().size() + 1); // Generar ID Long
         Incidencia nueva = new Incidencia(
-            "INC-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase(),
+            idIncidencia, // Nuevo Long ID
             tipo,
             descripcion,
-            LocalDateTime.now(),
-            usuario,
+            LocalDateTime.now(), // Usar fechaReporte
+            EstadoIncidencia.ABIERTA, // Estado inicial ABIERTA
+            usuario, // Usar reportante
             evento,
-            EstadoIncidencia.PENDIENTE
+            null // Compra relacionada (opcional, por ahora null)
         );
         Taquilla.getInstance().getIncidencias().add(nueva);
     }
@@ -40,26 +42,30 @@ public class IncidenciaServiceImpl implements IIncidenciaService {
         if (t.getUsuarios().isEmpty() || t.getEventos().isEmpty()) return;
 
         try {
-            // 1. Una incidencia Pendiente
-            registrarIncidencia(TipoIncidencia.ERROR_PAGO, "Fallo en transacción Stripe", t.getUsuarios().get(1), t.getEventos().get(0));
+            // 1. Una incidencia Abierta
+            Long idIncidencia1 = (long) (t.getIncidencias().size() + 1);
+            Incidencia inc1 = new Incidencia(idIncidencia1, TipoIncidencia.ERROR_PAGO, "Fallo en transacción Stripe", LocalDateTime.now(), EstadoIncidencia.ABIERTA, t.getUsuarios().get(1), t.getEventos().get(0), null);
+            t.getIncidencias().add(inc1);
             
             // 2. Una incidencia que nacerá Resuelta
-            registrarIncidencia(TipoIncidencia.DOBLE_RESERVA, "Doble asignación silla A1", t.getUsuarios().get(0), t.getEventos().get(1));
-            cambiarEstado(listarIncidencias().get(1).getIdIncidencia(), EstadoIncidencia.RESUELTA);
+            Long idIncidencia2 = (long) (t.getIncidencias().size() + 1);
+            Incidencia inc2 = new Incidencia(idIncidencia2, TipoIncidencia.DOBLE_RESERVA, "Doble asignación silla A1", LocalDateTime.now(), EstadoIncidencia.ABIERTA, t.getUsuarios().get(0), t.getEventos().get(1), null);
+            t.getIncidencias().add(inc2);
+            cambiarEstado(inc2.getIdIncidencia(), EstadoIncidencia.RESUELTA);
             
         } catch (Exception ignored) {}
     }
 
     @Override
-    public void cambiarEstado(String idIncidencia, EstadoIncidencia nuevoEstado) throws Exception {
+    public void cambiarEstado(Long idIncidencia, EstadoIncidencia nuevoEstado) throws Exception {
         Incidencia inc = listarIncidencias().stream()
-                .filter(i -> i.getIdIncidencia().equals(idIncidencia))
+                .filter(i -> i.getIdIncidencia().equals(idIncidencia)) 
                 .findFirst()
                 .orElseThrow(() -> new Exception("Incidencia no encontrada."));
 
         // Validaciones de transición (RF-017 / Objetivo Funcional)
-        if (nuevoEstado == EstadoIncidencia.RESUELTA && inc.getEstado() != EstadoIncidencia.PENDIENTE) {
-            throw new Exception("Solo se pueden resolver incidencias que estén PENDIENTES.");
+        if (nuevoEstado == EstadoIncidencia.RESUELTA && (inc.getEstado() == EstadoIncidencia.CERRADA)) {
+            throw new Exception("No se puede resolver una incidencia que ya está CERRADA.");
         }
         if (nuevoEstado == EstadoIncidencia.CERRADA && inc.getEstado() != EstadoIncidencia.RESUELTA) {
             throw new Exception("Solo se pueden cerrar incidencias que ya estén RESUELTAS.");

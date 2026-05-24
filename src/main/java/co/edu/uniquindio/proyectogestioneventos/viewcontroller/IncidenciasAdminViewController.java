@@ -24,8 +24,9 @@ import java.time.format.DateTimeFormatter;
 public class IncidenciasAdminViewController {
 
     @FXML private AnchorPane rootPane;
-    @FXML private TableView<Incidencia> tablaIncidencias;
-    @FXML private TableColumn<Incidencia, String> colId, colUsuario, colEvento, colTipo, colDescripcion, colFecha, colEstado;
+    @FXML private TableView<Incidencia> tablaIncidencias; // Mantener TableView
+    @FXML private TableColumn<Incidencia, Long> colId; // Cambiado a Long
+    @FXML private TableColumn<Incidencia, String> colUsuario, colEvento, colTipo, colDescripcion, colFecha, colEstado; // Mantener String para otros
     @FXML private ComboBox<TipoIncidencia> cbTipoIncidencia;
     @FXML private ComboBox<Usuario> cbUsuario;
     @FXML private ComboBox<Evento> cbEvento;
@@ -45,7 +46,7 @@ public class IncidenciasAdminViewController {
     }
 
     private void configurarTabla() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("idIncidencia"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("idIncidencia")); // Ahora es Long
         colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         
         // Corrección: Usar lambdas para columnas de Enums y tipos no String
@@ -55,11 +56,11 @@ public class IncidenciasAdminViewController {
         colEstado.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getEstado() != null ? cellData.getValue().getEstado().toString() : "N/A"));
         
-        colFecha.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getFecha().format(formatter)));
+        colFecha.setCellValueFactory(cellData -> // Usar fechaReporte
+            new SimpleStringProperty(cellData.getValue().getFechaReporte() != null ? cellData.getValue().getFechaReporte().format(formatter) : "N/A"));
 
-        colUsuario.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getUsuario() != null ? cellData.getValue().getUsuario().getNombre() : "N/A"));
+        colUsuario.setCellValueFactory(cellData -> // Usar reportante
+            new SimpleStringProperty(cellData.getValue().getReportante() != null ? cellData.getValue().getReportante().getNombre() : "N/A"));
 
         colEvento.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getEvento() != null ? cellData.getValue().getEvento().getNombre() : "N/A"));
@@ -155,9 +156,9 @@ public class IncidenciasAdminViewController {
                 "ID: %s\nEstado: %s\nFecha: %s\nTipo: %s\n\nUsuario: %s\nEvento: %s\n\nDescripción:\n%s",
                 incidenciaSeleccionada.getIdIncidencia(),
                 incidenciaSeleccionada.getEstado(),
-                incidenciaSeleccionada.getFecha().format(formatter),
+                incidenciaSeleccionada.getFechaReporte().format(formatter), // Usar fechaReporte
                 incidenciaSeleccionada.getTipo(),
-                incidenciaSeleccionada.getUsuario().getNombre(),
+                incidenciaSeleccionada.getReportante().getNombre(), // Usar reportante
                 incidenciaSeleccionada.getEvento().getNombre(),
                 incidenciaSeleccionada.getDescripcion()
             );

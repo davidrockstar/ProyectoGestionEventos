@@ -1,8 +1,13 @@
 package co.edu.uniquindio.proyectogestioneventos.model.state;
 
 import co.edu.uniquindio.proyectogestioneventos.model.Compra;
+import co.edu.uniquindio.proyectogestioneventos.model.Pago;
 import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoCompra;
+import co.edu.uniquindio.proyectogestioneventos.model.enums.EstadoPago;
 import co.edu.uniquindio.proyectogestioneventos.pago.ProcesadorPago;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Estado concreto: la compra ha sido creada pero no pagada.
@@ -20,6 +25,17 @@ public class EstadoCreada implements IEstadoCompra {
         boolean pagoExitoso = procesador.ejecutarPago(compra.getPrecioTotal());
 
         if (pagoExitoso) {
+            // Crear el registro interno del pago tras el éxito de la pasarela
+            Pago registro = new Pago(
+                    System.currentTimeMillis(),
+                    compra.getPrecioTotal(),
+                    LocalDateTime.now(),
+                    EstadoPago.APROBADO,
+                    UUID.randomUUID().toString(),
+                    compra.getMetodoPago().getDetalles()
+            );
+            compra.setRegistroPago(registro);
+
             // Al pagar, el estado cambia a PAGADA
             compra.setEstado(EstadoCompra.PAGADA);
         } else {

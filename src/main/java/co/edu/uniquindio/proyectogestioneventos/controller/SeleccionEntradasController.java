@@ -58,7 +58,9 @@ public class SeleccionEntradasController {
     @FXML
     private TableView<Asiento> tablaAsientos;
     @FXML
-    private TableColumn<Asiento, String> colCodigo, colFila, colNumero, colEstado;
+    private TableColumn<Asiento, String> colCodigo, colFila, colEstado;
+    @FXML
+    private TableColumn<Asiento, Integer> colNumero; // Cambiado a Integer para coincidir con el modelo
 
     public void setEvento(Evento evento) {
         if (evento == null) {
@@ -86,8 +88,8 @@ public class SeleccionEntradasController {
     private void initialize() {
         configurarCombos();
         
-        // Configuración de columnas de la tabla de asientos
-        colCodigo.setCellValueFactory(new PropertyValueFactory<>("idAsiento"));
+        // Configuración de columnas de la tabla de asientos (usando el nuevo atributo 'codigo')
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigo"));
         colFila.setCellValueFactory(new PropertyValueFactory<>("fila"));
         colNumero.setCellValueFactory(new PropertyValueFactory<>("numero"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
@@ -206,13 +208,16 @@ public class SeleccionEntradasController {
             );
 
             // 3. Generar entrada temporal
-            String idEntrada = "EN-" + UUID.randomUUID().toString().substring(0, 5);
-            Entrada nuevaEntrada = new Entrada(idEntrada, zona, asiento, zona.getPrecioBase(), EstadoEntrada.ACTIVA);
+            Long idEntrada = (long) (System.currentTimeMillis() % 1_000_000); // Generar un ID Long simple
+            Entrada nuevaEntrada = new Entrada(idEntrada, // Nuevo Long ID
+                                              zona, asiento, zona.getPrecioBase(), EstadoEntrada.VALIDADA,
+                                              eventoActual, // El evento actual
+                                              MyApplication.getUsuarioLogueado()); // El usuario logueado es el propietario
             List<Entrada> entradas = new ArrayList<>();
             entradas.add(nuevaEntrada);
 
             // 4. Abrir CheckoutView enviando datos reales
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/CheckoutView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/proyectogestioneventos/usuario/cliente/CheckoutView.fxml")); // Mantener la ruta existente
             Parent root = loader.load();
             
             CheckoutViewController controller = loader.getController();

@@ -38,7 +38,6 @@
                   <Button mnemonicParsing="false" onAction="#onEditEventoClick" text="Editar" />
                   <Button mnemonicParsing="false" onAction="#onDeleteEventoClick" text="Eliminar" />
                   <Button mnemonicParsing="false" onAction="#onPublicarEventoClick" text="Publicar" />
-                  <Button mnemonicParsing="false" onAction="#onPausarEventoClick" text="Pausar" />
                   <Button mnemonicParsing="false" onAction="#onCancelarEventoClick" text="Cancelar" />
                   <Button mnemonicParsing="false" onAction="#onVolverClick" text="Volver" />
                </children>

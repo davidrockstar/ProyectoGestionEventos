@@ -13,4 +13,5 @@ module co.edu.uniquindio.proyectogestioneventos {
     exports co.edu.uniquindio.proyectogestioneventos.controller;
     opens co.edu.uniquindio.proyectogestioneventos.controller to javafx.fxml;
     exports co.edu.uniquindio.proyectogestioneventos.model.enums;
+    opens co.edu.uniquindio.proyectogestioneventos.model.enums to javafx.fxml;
 }
